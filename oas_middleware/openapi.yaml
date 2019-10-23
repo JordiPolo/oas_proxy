@@ -1,0 +1,312 @@
+openapi: 3.0.2
+info:
+  description: |-
+    Hippocrates is a service which gathers metrics to ensure that deployed, discoverable resources are
+    adhering to our SOA governance objectives.
+  version: v1.0.12
+  title: SOA Resource Monitor for Medidata Platform
+  contact:
+    name: Team10 in Japan
+    email: team10@mdsol.com
+servers:
+  - url: https://hippocrates{stage}.imedidata{region}.{tld}{basePath}
+    variables:
+      stage:
+        default: sandbox
+      region:
+        default: ''
+      tld:
+        default: net
+      basePath:
+        default: '/v1'
+x-mdsol:
+  docs:
+    ResourceMonitors:
+      page: Platform Health and Monitoring/Platform Resource Monitors
+      overview: Constantly gathers metrics about deployed, discoverable resources
+  eurekaName: hippocrates
+  eurekaAutoVersioning: true
+  slos:
+    singleResource:
+      99thPercentile: 100ms
+      requestsPerSecond: 50
+    multipleResources:
+      99thPercentile: 250ms
+      requestsPerSecond: 25
+paths:
+  '/resource_monitors':
+    x-mdsol:
+      doc:
+        $ref: '#/x-mdsol/docs/ResourceMonitors'
+      slo:
+        $ref: '#/x-mdsol/slos/multipleResources'
+    get:
+      summary: Get All Resource Monitors
+      operationId: resource_monitors.index
+      parameters:
+        - $ref: '#/components/parameters/host'
+        - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/monitorStatus'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/perPage'
+        - $ref: '#/components/parameters/includeCount'
+      responses:
+        '404':
+          description: Resource monitors not found.
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResourceMonitor'
+  '/resource_monitors/{uuid}':
+    x-mdsol:
+      doc:
+        $ref: '#/x-mdsol/docs/ResourceMonitors'
+      slo:
+        $ref: '#/x-mdsol/slos/singleResource'
+    get:
+      summary: Get a Resource Monitor
+      operationId: resource_monitors.show
+      parameters:
+        - $ref: '#/components/parameters/uuid'
+      responses:
+        '404':
+          description: Resource monitor not found.
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceMonitor'
+  '/resource_monitors/{uuid}/check':
+    x-mdsol:
+      doc:
+        $ref: '#/x-mdsol/docs/ResourceMonitors'
+      slo:
+        $ref: '#/x-mdsol/slos/singleResource'
+    post:
+      summary: Force a Resource Monitor to check its resource
+      operationId: resource_monitors.check
+      parameters:
+        - $ref: '#/components/parameters/uuid'
+      responses:
+        '404':
+          description: Resource monitor not found.
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceMonitor'
+  '/resource_monitors/{uuid}/pause':
+    x-mdsol:
+      doc:
+        $ref: '#/x-mdsol/docs/ResourceMonitors'
+      slo:
+        $ref: '#/x-mdsol/slos/singleResource'
+    post:
+      summary: Force a Resource Monitor to pause checking its resource
+      operationId: resource_monitors.pause
+      parameters:
+        - $ref: '#/components/parameters/uuid'
+      responses:
+        '404':
+          description: Resource monitor not found.
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceMonitor'
+  '/resource_monitors/{uuid}/restart':
+    x-mdsol:
+      doc:
+        $ref: '#/x-mdsol/docs/ResourceMonitors'
+      slo:
+        $ref: '#/x-mdsol/slos/singleResource'
+    post:
+      summary: Force a Resource Monitor to resume checking its resource
+      operationId: resource_monitors.restart
+      parameters:
+        - $ref: '#/components/parameters/uuid'
+      responses:
+        '404':
+          description: Resource monitor not found.
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceMonitor'
+  '/resource_monitors/{uuid}/add_alertee_email':
+    x-mdsol:
+      doc:
+        $ref: '#/x-mdsol/docs/ResourceMonitors'
+      slo:
+        $ref: '#/x-mdsol/slos/singleResource'
+    post:
+      summary: Add an alertee email to the Resource Monitor
+      operationId: resource_monitors.add_alertee_email
+      parameters:
+        - $ref: '#/components/parameters/uuid'
+      responses:
+        '404':
+          description: Resource monitor not found.
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceMonitor'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlerteeEmail'
+  '/resource_monitors/{uuid}/remove_alertee_email':
+    x-mdsol:
+      doc:
+        $ref: '#/x-mdsol/docs/ResourceMonitors'
+      slo:
+        $ref: '#/x-mdsol/slos/singleResource'
+    post:
+      summary: Remove an alertee email from the Resource Monitor
+      operationId: resource_monitors.remove_alertee_email
+      parameters:
+        - $ref: '#/components/parameters/uuid'
+      responses:
+        '404':
+          description: Resource monitor not found.
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceMonitor'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlerteeEmail'
+components:
+  parameters:
+    host:
+      in: query
+      name: host
+      description: Filter the collection by resource host.
+      required: false
+      schema:
+        type: string
+    status:
+      in: query
+      name: status
+      description: Filter the collection by resource status.
+      required: false
+      schema:
+        type: string
+    monitorStatus:
+      in: query
+      name: monitor_status
+      description: |-
+        Filter the collection by resource monitor status; one of "idle", "checking", or "paused".
+        Returns only active monitors (e.g. which are not in the "paused" state) if not provided.
+      required: false
+      schema:
+        type: string
+    page:
+      in: query
+      name: page
+      description: The page number for the results to display.
+      required: false
+      schema:
+        type: integer
+    perPage:
+      in: query
+      name: per_page
+      description: The number of results per page.
+      required: false
+      schema:
+        type: integer
+        default: 25
+    includeCount:
+      in: query
+      name: include_count
+      description: Whether or not to include the total count of result entities.
+      required: false
+      schema:
+        type: boolean
+        default: false
+    uuid:
+      name: uuid
+      in: path
+      description: UUID of the resource monitor.
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    ResourceMonitor:
+      x-mdsol:
+        resource: resource_monitors
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: Unique identifier for a particular ResourceMonitor (read-only - managed by the service).
+        type:
+          type: string
+          description: The type of the resource monitor (e.g. AuthenticationMonitor).
+        host:
+          type: string
+          description: |-
+            The host of the monitored resource (e.g. dalton-sandbox.imedidata.net);
+            this serves as an indication of which stage the resource is in and also will serve as
+            a sanity-check that the resource is being served by the expected host.
+            Hippocrates will be responsible for changing this domain if the resource moves
+            from one domain to another.
+        timestamp:
+          type: string
+          description: Read-only datetime stamp indicate when the resource was last monitored by Hippocrates.
+        status:
+          type: string
+          description: The most recently-reported status of the resource, either 'good' or 'bad'.
+        status_message:
+          type: string
+          description: |-
+            If the value of status is 'bad', this attribute will contain a human-readable message describing
+            why the resource is in a bad state.
+        monitor_status:
+          type: string
+          description: |-
+            The current status of the resource monitor itself.
+            This will be 'idle' when the resource monitor isn't actively checking its resource;
+            'checking' when the resource monitor is actively checking its resource; and 'paused' if the
+            resource monitor has been told to stop checking its resource.
+        app_name:
+          type: string
+          description: The name of the application, which is extracted from 'host' (e.g. dalton_sandbox).
+        check_link:
+          type: string
+          description: The link to invoke the check for the resource.
+        results:
+          type: string
+          description: The output of the check in a Hypermedia document.
+        emails_to_alert:
+          type: array
+          description: The email addresses to alert for the project of the resource monitor.
+          items:
+            type: string
+    AlerteeEmail:
+      type: object
+      required:
+        - alertee_email
+      properties:
+        alertee_email:
+          description: The email address to alert.
+          type: string

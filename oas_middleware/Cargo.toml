@@ -1,0 +1,26 @@
+[package]
+name = "oas_middleware"
+version = "0.1.0"
+authors = ["jcarres-mdsol <jcarres@mdsol.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies.simple_proxy]
+#version = "*"
+path = "../rs-simple-proxy"
+
+[dependencies]
+hyper = "0.12.0"
+openapiv3 = "0.3.0"
+serde = {version = "1.0", features = ["derive"]}
+serde_json = "1.0"
+serde_yaml = "0.8"
+indexmap = {version = "1.0", features = ["serde-1"]}
+log = "*"
+regex = "*"
+uuid = "*"
+anyhow = "1.0"
+thiserror = "1.0"
+http = "*"
+chrono = "0.3"
