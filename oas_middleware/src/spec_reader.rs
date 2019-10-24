@@ -51,9 +51,7 @@ fn deref_all_params(parameters: &mut Vec<ReferenceOr<Parameter>>, spec: &OpenAPI
 }
 
 ///
-/// ```
-/// let path_to_operation2;
-/// ```
+
 fn path_to_operation2(item: &mut PathItem) -> &mut Operation {
       item
             .get.as_mut()
