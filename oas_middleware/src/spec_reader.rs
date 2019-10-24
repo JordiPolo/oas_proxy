@@ -4,18 +4,15 @@ use std::path::Path;
 use crate::spec_utils;
 
 pub fn read_and_deref_all<P: AsRef<Path>>(filename: P) -> OpenAPI {
-    let spec_with_ref = read(filename);
-    deref_all(spec_with_ref)
+    deref_all(read(filename))
 }
 
 fn read<P: AsRef<Path>>(filename: P) -> OpenAPI {
     let data = std::fs::read_to_string(filename).expect("OpenAPI file could not be read.");
-    let spec = serde_yaml::from_str(&data).expect("Could not deserialize input as OpenAPI v3.0");
+    let spec = serde_yaml::from_str(&data).expect("Could not deserialize file as OpenAPI v3.0 yaml");
     debug!("The openapi after parsed {:?}", spec);
     spec
 }
-
-
 
 fn deref_all(mut spec: OpenAPI) -> OpenAPI {
     let ein_spec = spec.clone(); //hack
@@ -31,7 +28,7 @@ fn deref_all(mut spec: OpenAPI) -> OpenAPI {
 
 fn defer_path_item(ref_path: &mut ReferenceOr<PathItem>) -> &mut PathItem {
     match ref_path {
-        ReferenceOr::Reference { reference } => {
+        ReferenceOr::Reference { .. } => {
             unimplemented!("External description of paths not supported")
         }
         ReferenceOr::Item(item) => { item }
@@ -53,7 +50,10 @@ fn deref_all_params(parameters: &mut Vec<ReferenceOr<Parameter>>, spec: &OpenAPI
 
 }
 
-
+///
+/// ```
+/// let path_to_operation2;
+/// ```
 fn path_to_operation2(item: &mut PathItem) -> &mut Operation {
       item
             .get.as_mut()

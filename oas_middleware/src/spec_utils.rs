@@ -2,7 +2,7 @@ use openapiv3::*;
 use crate::error::{E, unsupported};
 use anyhow::{Result};
 
-pub fn path_to_operation3<'a>(mut item: &'a mut PathItem) -> (&'a mut Vec<ReferenceOr<Parameter>>,&'a mut Operation) {
+pub fn path_to_operation3<'a>(item: &'a mut PathItem) -> (&'a mut Vec<ReferenceOr<Parameter>>,&'a mut Operation) {
         (&mut item.parameters,
         item
         .get.as_mut()
