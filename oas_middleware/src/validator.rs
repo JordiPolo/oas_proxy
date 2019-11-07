@@ -5,6 +5,7 @@ use crate::error::unsupported;
 use crate::error::E;
 use crate::request::{Request, Attribute, Params, RequestBuilder};
 use crate::spec_utils;
+use openapi_deref::deref;
 
 use anyhow::{Context, Result};
 
@@ -50,7 +51,7 @@ use anyhow::{Context, Result};
 
         for parameter2 in mutable_params {
             let mut parameter : &mut ReferenceOr<Parameter> = parameter2;
-            let mut param = spec_utils::deref(parameter);
+            let mut param = deref(parameter);
             let mut param_data = spec_utils::parameter_to_parameter_data(param);
             if param_data.name == param_name {
                 error!("Used! {}", param_name);

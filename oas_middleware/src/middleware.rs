@@ -9,8 +9,9 @@ use http::uri::Uri;
 use serde_json::json;
 use std::path::Path;
 
+use openapi_deref::read_and_deref_all;
+
 use crate::validator;
-use crate::spec_reader;
 use crate::request;
 
 
@@ -20,7 +21,7 @@ pub struct OASMiddleware{//<'a> {
 }
 impl OASMiddleware {
     pub fn new<P: AsRef<Path>>(filename: P) -> Self {
-        let spec = spec_reader::read_and_deref_all(filename);
+        let spec = read_and_deref_all(filename);
         let request_builder = request::RequestBuilder::new(spec);
         OASMiddleware {
          //   spec,

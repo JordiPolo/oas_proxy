@@ -50,35 +50,4 @@ pub fn used(description: &mut Option<String>) {
     *description = Some("1".to_string());
 }
 
-pub fn find_parameter_reference(spec: &OpenAPI, reference: &str) -> Result<Parameter> {
-    debug!("Searching for reference {}", reference);
-    let reference_name: &str = reference.rsplit('/').nth(0).unwrap();
-    // let reference_category: &str = reference.rsplit('/').nth(1).unwrap();
 
-    let components = spec
-        .components
-        .as_ref()
-        .expect("There was a reference but components is not present in the file!");
-
-    let parameter = components
-        .parameters
-        .get(reference_name)
-        .ok_or(E::ParamError(reference_name.to_string()))?;
-
-    match parameter {
-        ReferenceOr::Reference { reference: _ } => {
-            Err(unsupported("Reference in parameters are not supported"))?
-        }
-        ReferenceOr::Item(item) => Ok(item.clone()),
-    }
-}
-
-pub fn deref<'a,T>(the_ref: &'a mut ReferenceOr<T>) -> &'a mut T {
-    match the_ref {
-        ReferenceOr::Reference { reference: _ } => {
-            unimplemented!("There could not be any reference as we have dereferenced the file")
-
-        }
-        ReferenceOr::Item(item) => { item }
-    }
-}
