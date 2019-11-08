@@ -61,7 +61,15 @@ impl Middleware for OASMiddleware {
             return Ok(RespondWith(ok));
         }
 
-        let mut request = self.request_builder.build(&req)?;
+        let mut request = self.request_builder.build(&req).map_err(|error| {
+            MiddlewareError::new(
+                String::from("Request information not found in the OpenAPI file."),
+                Some(error_to_json(error, req.uri())),
+                StatusCode::BAD_REQUEST,
+            )
+        })?;
+
+
         debug!("Request {:?}", request);
 
 

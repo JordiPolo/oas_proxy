@@ -18,17 +18,25 @@ pub fn read<P: AsRef<Path>>(filename: P) -> OpenAPI {
 
 pub fn deref_all(mut spec: OpenAPI) -> OpenAPI {
     let ein_spec = spec.clone(); //hack
-    for (_, mut path_item) in &mut spec.paths {
-        let mut p_item = deref(&mut path_item);
+    for (_, path_item) in &mut spec.paths {
+        let p_item = deref_mut(path_item);
         deref_all_params(&mut p_item.parameters, &ein_spec);
-        let operation = path_to_operation(&mut p_item);
-        deref_all_params(&mut operation.parameters, &ein_spec);
+
+        let p_item2 = p_item.clone(); // hack as things are used, etc.
+
+        for operation in operation_list(p_item) {
+            deref_all_params(&mut operation.parameters, &ein_spec);
+            // Move from path level params to each operation so it is easier later
+            for param in &p_item2.parameters {
+                operation.parameters.push(param.clone());
+            }
+        }
     }
     spec
 }
 
 
-pub fn deref<T>(the_ref: &mut ReferenceOr<T>) -> &mut T {
+pub fn deref<T>(the_ref: &ReferenceOr<T>) -> &T {
     match the_ref {
         ReferenceOr::Reference { reference } => {
             unimplemented!("No support to dereference {}.", reference)
@@ -37,6 +45,16 @@ pub fn deref<T>(the_ref: &mut ReferenceOr<T>) -> &mut T {
     }
 }
 
+
+
+pub fn deref_mut<T>(the_ref: &mut ReferenceOr<T>) -> &mut T {
+    match the_ref {
+        ReferenceOr::Reference { reference } => {
+            unimplemented!("No support to dereference {}.", reference)
+        }
+        ReferenceOr::Item(item) => item,
+    }
+}
 
 
 
@@ -54,20 +72,24 @@ fn deref_all_params(parameters: &mut Vec<ReferenceOr<Parameter>>, spec: &OpenAPI
     }
 }
 
-///
-
-fn path_to_operation(item: &mut PathItem) -> &mut Operation {
-    item.get
-        .as_mut()
-        .or(item.head.as_mut())
-        .or(item.options.as_mut())
-        .or(item.trace.as_mut())
-        .or(item.delete.as_mut())
-        .or(item.patch.as_mut())
-        .or(item.post.as_mut())
-        .or(item.put.as_mut())
-        .expect("Failed to read the operation for pathItem")
+fn operation_list<'a>(item: &'a mut PathItem) -> Vec<&'a mut Operation> {
+    let mut result = Vec::new();
+    let mut pusher = |operation: &'a mut Option<Operation>| {
+        if operation.is_some() {
+            result.push(operation.as_mut().unwrap());
+        }
+    };
+    pusher(&mut item.delete);
+    pusher(&mut item.get);
+    pusher(&mut item.head);
+    pusher(&mut item.options);
+    pusher(&mut item.patch);
+    pusher(&mut item.post);
+    pusher(&mut item.put);
+    pusher(&mut item.trace);
+    result
 }
+
 
 fn find_parameter_reference(spec: &OpenAPI, reference: &str) -> Result<Parameter, DerefError> {
     //debug!("Searching for reference {}", reference);

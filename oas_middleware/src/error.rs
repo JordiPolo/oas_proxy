@@ -6,6 +6,9 @@ pub enum E {
     #[error("The path `{0}` is not described in the OpenAPI file.")]
     PathError(String),
 
+    #[error("The method `{0}` is not described in the OpenAPI file.")]
+    MethodError(String),
+
     #[error("The parameter `{0}` is not described in the OpenAPI file.")]
     ParamError(String),
 

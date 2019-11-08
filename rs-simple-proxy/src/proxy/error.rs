@@ -50,7 +50,7 @@ where
 {
     fn from(err: E) -> MiddlewareError {
         MiddlewareError::new(
-            String::from(err.description()),
+            format!("{}", err),
             None,
             StatusCode::INTERNAL_SERVER_ERROR,
         )

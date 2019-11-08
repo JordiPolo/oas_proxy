@@ -7,7 +7,6 @@ use anyhow::Result;
 use crate::error::E;
 use crate::spec_utils;
 
-use openapi_deref::deref;
 
 #[derive( Debug)]
 pub struct PathMatcher {
@@ -26,7 +25,6 @@ pub struct Request {
     pub query_variables: Option<Vec<Attribute>>,
     pub operation: Operation,
 //    pub operation: &'a mut Operation,
- //   pub operation_params: &'a mut Vec<ReferenceOr<Parameter>>,
 }
 
 #[derive(Clone, Debug)]
@@ -67,35 +65,23 @@ fn path_variables(regex: &Regex, path: &str) -> Option<Params> {
     Some(variables)
 }
 
-pub fn deref2<T>(the_ref: ReferenceOr<T>) -> T {
-    match the_ref {
-        ReferenceOr::Reference { reference } => {
-            unimplemented!("No support to dereference {}.", reference)
-        }
-        ReferenceOr::Item(item) => item,
-    }
-}
-
-
 impl RequestBuilder {
     pub fn new (spec: OpenAPI) -> Self {
         let path_matches = RequestBuilder::create_path_regexes(spec);
         RequestBuilder { path_matches: path_matches }
     }
 
-    pub fn build<'a>(&'a mut self, request: &hyper::Request<hyper::Body>) -> Result<Request, E> {
+    pub fn build<'a>(&'a mut self, request: &hyper::Request<hyper::Body>) -> Result<Request> {
         let path = self.find_path(request.uri().path())?;
         let path_variables = path_variables(&path.regex, &request.uri().path());
         let query_variables = query_variables(&request.uri().query());
         //let mut path_item = deref2(path.path.clone());
-        let (operation_params, mut operation) = spec_utils::path_to_operation(&path.path);
+        let mut operation = spec_utils::path_to_operation2(&path.path, &request.method())?;
         //spec_utils::used(&mut operation.description);
         Ok(Request {
             path_variables,
             query_variables,
             operation: operation.clone(), // &mut self.operation_from_request(request.uri().path()),
-   //         operation_params: operation_params,
-            //operation_params,
         })
     }
 

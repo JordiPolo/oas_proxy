@@ -1,6 +1,9 @@
 use openapiv3::*;
 use crate::error::{E, unsupported};
-use anyhow::{Result};
+//use anyhow::{Result};
+use hyper::Method;
+
+use openapi_deref::deref;
 
 pub fn path_to_operation3<'a>(item: &'a mut PathItem) -> (&'a mut Vec<ReferenceOr<Parameter>>,&'a mut Operation) {
         (&mut item.parameters,
@@ -14,6 +17,21 @@ pub fn path_to_operation3<'a>(item: &'a mut PathItem) -> (&'a mut Vec<ReferenceO
         .or(item.post.as_mut())
         .or(item.put.as_mut()).expect("Failed")) //&format!("Failed at {:?}", &item)))
 
+}
+
+pub fn path_to_operation2<'a>(path_matcher: &'a ReferenceOr<PathItem>, method: &Method) -> Result<&'a Operation, E> {
+    let item = deref(path_matcher);
+    let inner = |op: &'a Option<Operation>| { op.as_ref().ok_or(E::MethodError(format!("{:?}", method))) };
+    match *method {
+        Method::DELETE => inner(&item.delete),
+        Method::GET => inner(&item.get),
+        Method::HEAD => inner(&item.head),
+        Method::OPTIONS => inner(&item.options),
+        Method::PATCH => inner(&item.patch),
+        Method::POST => inner(&item.post),
+        Method::PUT => inner(&item.put),
+        _ => unimplemented!("Method not supported")
+    }
 }
 
 pub fn path_to_operation<'a>(path_matcher: &'a ReferenceOr<PathItem>) -> (&'a Vec<ReferenceOr<Parameter>>,&'a Operation) {
