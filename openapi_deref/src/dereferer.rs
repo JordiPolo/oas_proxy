@@ -1,20 +1,5 @@
 use openapiv3::*;
-use serde_yaml;
-use std::path::Path;
-
 use crate::error::DerefError;
-
-pub fn read_and_deref_all<P: AsRef<Path>>(filename: P) -> OpenAPI {
-    deref_all(read(filename))
-}
-
-pub fn read<P: AsRef<Path>>(filename: P) -> OpenAPI {
-    let data = std::fs::read_to_string(filename).expect("OpenAPI file could not be read.");
-    let spec =
-        serde_yaml::from_str(&data).expect("Could not deserialize file as OpenAPI v3.0 yaml");
-    debug!("The openapi after parsed {:?}", spec);
-    spec
-}
 
 pub fn deref_all(mut spec: OpenAPI) -> OpenAPI {
     let ein_spec = spec.clone(); //hack
@@ -35,6 +20,14 @@ pub fn deref_all(mut spec: OpenAPI) -> OpenAPI {
     spec
 }
 
+pub fn deref_own<T>(the_ref: ReferenceOr<T>) -> T {
+    match the_ref {
+        ReferenceOr::Reference { reference } => {
+            unimplemented!("No support to dereference {}.", reference)
+        }
+        ReferenceOr::Item(item) => item,
+    }
+}
 
 pub fn deref<T>(the_ref: &ReferenceOr<T>) -> &T {
     match the_ref {
@@ -44,8 +37,6 @@ pub fn deref<T>(the_ref: &ReferenceOr<T>) -> &T {
         ReferenceOr::Item(item) => item,
     }
 }
-
-
 
 pub fn deref_mut<T>(the_ref: &mut ReferenceOr<T>) -> &mut T {
     match the_ref {

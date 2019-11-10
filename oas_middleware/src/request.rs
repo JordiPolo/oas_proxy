@@ -7,24 +7,26 @@ use anyhow::Result;
 use crate::error::E;
 use crate::spec_utils;
 
+use openapi_deref::deref_own;
+
 
 #[derive( Debug)]
 pub struct PathMatcher {
     regex: Regex,
-    path: ReferenceOr<PathItem>,
+    path: PathItem,
 }
 
 #[derive( Default, Debug)]
 pub struct RequestBuilder {
-    path_matches: Vec<PathMatcher>,
+    pub path_matches: Vec<PathMatcher>,
 }
 
 #[derive(Debug)]
-pub struct Request {
+pub struct Request<'a> {
     pub path_variables: Option<Vec<Attribute>>,
     pub query_variables: Option<Vec<Attribute>>,
-    pub operation: Operation,
-//    pub operation: &'a mut Operation,
+//    pub operation: Operation,
+    pub operation: &'a mut Operation,
 }
 
 #[derive(Clone, Debug)]
@@ -76,12 +78,12 @@ impl RequestBuilder {
         let path_variables = path_variables(&path.regex, &request.uri().path());
         let query_variables = query_variables(&request.uri().query());
         //let mut path_item = deref2(path.path.clone());
-        let mut operation = spec_utils::path_to_operation2(&path.path, &request.method())?;
-        //spec_utils::used(&mut operation.description);
+        let operation = spec_utils::path_to_operation(&mut path.path, &request.method())?;
+        spec_utils::used(&mut operation.description);
         Ok(Request {
             path_variables,
             query_variables,
-            operation: operation.clone(), // &mut self.operation_from_request(request.uri().path()),
+            operation: operation//.clone(), // &mut self.operation_from_request(request.uri().path()),
         })
     }
 
@@ -162,7 +164,7 @@ impl RequestBuilder {
             let path = format!("{}{}", base_path, p);
             let pr = PathMatcher {
                 regex: RequestBuilder::spec_path_to_regex_str(&path),
-                path: path_item,
+                path: deref_own(path_item),
             };
             result.push(pr);
         }

@@ -9,10 +9,11 @@ use http::uri::Uri;
 use serde_json::json;
 use std::path::Path;
 
-use openapi_deref::read_and_deref_all;
+use openapi_deref::deref_all;
 
 use crate::validator;
 use crate::request;
+use crate::spec_utils;
 
 
 pub struct OASMiddleware{//<'a> {
@@ -21,7 +22,7 @@ pub struct OASMiddleware{//<'a> {
 }
 impl OASMiddleware {
     pub fn new<P: AsRef<Path>>(filename: P) -> Self {
-        let spec = read_and_deref_all(filename);
+        let spec = deref_all(spec_utils::read(filename));
         let request_builder = request::RequestBuilder::new(spec);
         OASMiddleware {
          //   spec,
@@ -34,13 +35,54 @@ fn error_to_json(error: Error, uri: &Uri) -> String {
     let causes: Vec<String> = error.chain().map(|e| e.to_string()).collect();
 
     json!({
-        "type": "FailedContractValidation",
-        "title": "Request not consistent with OpenAPI description.",
+        "type": "errors:contract_broken",
+        "title": "The request does not follow the rules of the API contract.",
         "failed_url": uri.to_string(),
         "causes": causes,
+        "status": 422,
     })
     .to_string()
 }
+
+/*
+use std::collections::HashMap;
+
+struct UsedSpec {
+    spec: HashMap<String, Vec<UsedMethod>>,
+}
+
+struct UsedMethod {
+used: bool,
+method: String,
+parameters: Vec<UsedParam>,
+body: HashMap<String, UsedSchema>,
+responses: HashMap<String, UsedSchema>,
+}
+
+struct UsedSchema {
+    used: bool,
+    properties: Vec<UsedProperty>
+}
+
+
+struct UsedProperty {
+    used: bool,
+    name: String,
+}
+
+struct UsedParam {
+    used: bool,
+    name: String,
+    location: String,
+}
+
+fn render_report(builder: &request::RequestBuilder) -> UsedSpec {
+    let mut paths = HashMap::new();
+    for path_match in builder.path_matches {
+        let methods = Vec::new();
+    }
+}
+*/
 
 impl Middleware for OASMiddleware {
     fn name() -> String {
@@ -56,6 +98,7 @@ impl Middleware for OASMiddleware {
         info!("New request to {}", req.uri());
 
         if req.uri().path() == "/report" {
+//            render_report(&self.request_builder);
             let spec = format!("{:?}", &self.request_builder);
             let ok: Response<Body> = Response::new(Body::from(spec));
             return Ok(RespondWith(ok));

@@ -9,15 +9,15 @@ use openapi_deref::deref_mut;
 use anyhow::{Context, Result};
 
 pub fn validate(request: &mut Request) -> Result<()> {
-    let operation = &mut request.operation;
+    let mut operation = &mut request.operation;
 
     if let Some(variables) = &mut request.path_variables {
-        validate_variables(operation, &variables)
+        validate_variables(&mut operation, &variables)
             .context("Failure in a path variable.")?;
     }
 
     if let Some(variables) = &request.query_variables {
-        validate_variables(&mut request.operation.clone(), &variables)
+        validate_variables(&mut operation, &variables)
             .context("Failure in a query parameter.")?;
     }
 
@@ -39,13 +39,13 @@ fn find_param<'a>(operation: &'a mut Operation, param_name: &str) -> Result<&'a 
     let mutable_params: &mut Vec<ReferenceOr<Parameter>> = operation.parameters.as_mut();
 
     for parameter2 in mutable_params {
-        let mut parameter : &mut ReferenceOr<Parameter> = parameter2;
-        let mut param = deref_mut(parameter);
+        let parameter : &mut ReferenceOr<Parameter> = parameter2;
+        let param = deref_mut(parameter);
         let mut param_data = spec_utils::parameter_to_parameter_data(param);
         if param_data.name == param_name {
             error!("Used! {}", param_name);
             param_data.description =  Some("1".to_string());
-            //spec_utils::used(&mut param_data.description);
+            spec_utils::used(&mut param_data.description);
             return Ok(param_data);
         }
     }

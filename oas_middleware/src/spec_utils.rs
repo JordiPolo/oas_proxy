@@ -1,57 +1,29 @@
 use openapiv3::*;
-use crate::error::{E, unsupported};
+use crate::error::{E};
 //use anyhow::{Result};
 use hyper::Method;
+use serde_yaml;
+use std::path::Path;
 
-use openapi_deref::deref;
-
-pub fn path_to_operation3<'a>(item: &'a mut PathItem) -> (&'a mut Vec<ReferenceOr<Parameter>>,&'a mut Operation) {
-        (&mut item.parameters,
-        item
-        .get.as_mut()
-        .or(item.head.as_mut())
-        .or(item.options.as_mut())
-        .or(item.trace.as_mut())
-        .or(item.delete.as_mut())
-        .or(item.patch.as_mut())
-        .or(item.post.as_mut())
-        .or(item.put.as_mut()).expect("Failed")) //&format!("Failed at {:?}", &item)))
-
+pub fn read<P: AsRef<Path>>(filename: P) -> OpenAPI {
+    let data = std::fs::read_to_string(filename).expect("OpenAPI file could not be read.");
+    let spec =
+        serde_yaml::from_str(&data).expect("Could not deserialize file as OpenAPI v3.0 yaml");
+    debug!("The openapi after parsed {:?}", spec);
+    spec
 }
 
-pub fn path_to_operation2<'a>(path_matcher: &'a ReferenceOr<PathItem>, method: &Method) -> Result<&'a Operation, E> {
-    let item = deref(path_matcher);
-    let inner = |op: &'a Option<Operation>| { op.as_ref().ok_or(E::MethodError(format!("{:?}", method))) };
+pub fn path_to_operation<'a>(item: &'a mut PathItem, method: &Method) -> Result<&'a mut Operation, E> {
+    let inner = |op: &'a mut Option<Operation>| { op.as_mut().ok_or(E::MethodError(format!("{:?}", method))) };
     match *method {
-        Method::DELETE => inner(&item.delete),
-        Method::GET => inner(&item.get),
-        Method::HEAD => inner(&item.head),
-        Method::OPTIONS => inner(&item.options),
-        Method::PATCH => inner(&item.patch),
-        Method::POST => inner(&item.post),
-        Method::PUT => inner(&item.put),
+        Method::DELETE => inner(&mut item.delete),
+        Method::GET => inner(&mut item.get),
+        Method::HEAD => inner(&mut item.head),
+        Method::OPTIONS => inner(&mut item.options),
+        Method::PATCH => inner(&mut item.patch),
+        Method::POST => inner(&mut item.post),
+        Method::PUT => inner(&mut item.put),
         _ => unimplemented!("Method not supported")
-    }
-}
-
-pub fn path_to_operation<'a>(path_matcher: &'a ReferenceOr<PathItem>) -> (&'a Vec<ReferenceOr<Parameter>>,&'a Operation) {
-    match path_matcher {
-        ReferenceOr::Reference { reference: _ } => {
-            // TODO: move reference finder somewhere and use it from here to clean up.
-            unimplemented!("TODO: path level reference found");
-        }
-        ReferenceOr::Item(item) => {
-            (&item.parameters,
-            item
-            .get.as_ref()
-            .or(item.head.as_ref())
-            .or(item.options.as_ref())
-            .or(item.trace.as_ref())
-            .or(item.delete.as_ref())
-            .or(item.patch.as_ref())
-            .or(item.post.as_ref())
-            .or(item.put.as_ref()).expect(&format!("Failed at {:?}", &item)))}
-
     }
 }
 
