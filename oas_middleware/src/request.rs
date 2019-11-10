@@ -9,14 +9,13 @@ use crate::spec_utils;
 
 use openapi_deref::deref_own;
 
-
-#[derive( Debug)]
+#[derive(Debug)]
 pub struct PathMatcher {
     regex: Regex,
     path: PathItem,
 }
 
-#[derive( Default, Debug)]
+#[derive(Default, Debug)]
 pub struct RequestBuilder {
     pub path_matches: Vec<PathMatcher>,
 }
@@ -25,7 +24,7 @@ pub struct RequestBuilder {
 pub struct Request<'a> {
     pub path_variables: Option<Vec<Attribute>>,
     pub query_variables: Option<Vec<Attribute>>,
-//    pub operation: Operation,
+    //    pub operation: Operation,
     pub operation: &'a mut Operation,
 }
 
@@ -37,7 +36,6 @@ pub struct Attribute {
 
 pub type Params = Vec<Attribute>;
 
-
 fn query_variables(q: &Option<&str>) -> Option<Params> {
     q.map(|query| {
         query
@@ -47,7 +45,10 @@ fn query_variables(q: &Option<&str>) -> Option<Params> {
             .flat_map(|pair| {
                 pair.find('=') // This returns an option, since '=' might not exist
                     .map(|idx| pair.split_at(idx)) // split it into (&str, &str)
-                    .map(|(a, b)| Attribute { name: a.to_string(), value: b[1..].to_string()}) // Since split includes the '=' char, remove it.
+                    .map(|(a, b)| Attribute {
+                        name: a.to_string(),
+                        value: b[1..].to_string(),
+                    }) // Since split includes the '=' char, remove it.
             })
             .collect()
     })
@@ -58,9 +59,9 @@ fn path_variables(regex: &Regex, path: &str) -> Option<Params> {
     for n in regex.capture_names() {
         if let Some(name) = n {
             let captures = regex.captures(&path).unwrap();
-            variables.push(Attribute{
+            variables.push(Attribute {
                 name: name.to_string(),
-                value: captures.name(&name).unwrap().as_str().to_string()
+                value: captures.name(&name).unwrap().as_str().to_string(),
             });
         }
     }
@@ -68,9 +69,11 @@ fn path_variables(regex: &Regex, path: &str) -> Option<Params> {
 }
 
 impl RequestBuilder {
-    pub fn new (spec: OpenAPI) -> Self {
+    pub fn new(spec: OpenAPI) -> Self {
         let path_matches = RequestBuilder::create_path_regexes(spec);
-        RequestBuilder { path_matches: path_matches }
+        RequestBuilder {
+            path_matches: path_matches,
+        }
     }
 
     pub fn build<'a>(&'a mut self, request: &hyper::Request<hyper::Body>) -> Result<Request> {
@@ -83,7 +86,7 @@ impl RequestBuilder {
         Ok(Request {
             path_variables,
             query_variables,
-            operation: operation//.clone(), // &mut self.operation_from_request(request.uri().path()),
+            operation: operation, //.clone(), // &mut self.operation_from_request(request.uri().path()),
         })
     }
 
@@ -93,7 +96,6 @@ impl RequestBuilder {
     //     operation.clone()
     // }
 
-
     fn find_path<'a>(&'a mut self, path: &str) -> Result<&'a mut PathMatcher, E> {
         let found = self
             .path_matches
@@ -101,8 +103,6 @@ impl RequestBuilder {
             .find(|path_match| path_match.regex.is_match(&path));
         found.ok_or(E::PathError(path.to_string()))
     }
-
-
 
     ///
     /// # Examples

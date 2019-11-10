@@ -3,22 +3,20 @@ use openapiv3::*;
 use crate::check_type;
 use crate::error::unsupported;
 use crate::error::E;
-use crate::request::{Request, Attribute, Params};
+use crate::request::{Attribute, Params, Request};
 use crate::spec_utils;
-use openapi_deref::deref_mut;
 use anyhow::{Context, Result};
+use openapi_deref::deref_mut;
 
 pub fn validate(request: &mut Request) -> Result<()> {
     let mut operation = &mut request.operation;
 
     if let Some(variables) = &mut request.path_variables {
-        validate_variables(&mut operation, &variables)
-            .context("Failure in a path variable.")?;
+        validate_variables(&mut operation, &variables).context("Failure in a path variable.")?;
     }
 
     if let Some(variables) = &request.query_variables {
-        validate_variables(&mut operation, &variables)
-            .context("Failure in a query parameter.")?;
+        validate_variables(&mut operation, &variables).context("Failure in a query parameter.")?;
     }
 
     Ok(())
@@ -39,19 +37,18 @@ fn find_param<'a>(operation: &'a mut Operation, param_name: &str) -> Result<&'a 
     let mutable_params: &mut Vec<ReferenceOr<Parameter>> = operation.parameters.as_mut();
 
     for parameter2 in mutable_params {
-        let parameter : &mut ReferenceOr<Parameter> = parameter2;
+        let parameter: &mut ReferenceOr<Parameter> = parameter2;
         let param = deref_mut(parameter);
         let mut param_data = spec_utils::parameter_to_parameter_data(param);
         if param_data.name == param_name {
             error!("Used! {}", param_name);
-            param_data.description =  Some("1".to_string());
+            param_data.description = Some("1".to_string());
             spec_utils::used(&mut param_data.description);
             return Ok(param_data);
         }
     }
     Err(E::ParamError(param_name.to_string()))?
 }
-
 
 fn check_format(param: &ParameterData, request_param_data: &Attribute) -> Result<()> {
     debug!("Checking parameter {:?}", request_param_data);
@@ -70,10 +67,9 @@ fn check_format(param: &ParameterData, request_param_data: &Attribute) -> Result
                 SchemaKind::Any(_) => Err(unsupported("Any not supported"))?,
             },
         },
-        ParameterSchemaOrContent::Content(_content) => unimplemented!("Not quite understand this one"),
+        ParameterSchemaOrContent::Content(_content) => {
+            unimplemented!("Not quite understand this one")
+        }
     }
     Ok(())
 }
-
-
-

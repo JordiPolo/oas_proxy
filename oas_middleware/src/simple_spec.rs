@@ -25,9 +25,8 @@ enum ParamPlace {
 
 #[derive(Clone)]
 struct SimpleResponse {
-    code: String
+    code: String,
 }
-
 
 // pub fn spec_to_simple(spec: &OpenAPI) -> SimpleSpec{
 //     let mut sspec = SimpleSpec { paths: Vec::new()};

@@ -1,5 +1,5 @@
-use thiserror::Error;
 use crate::request::Attribute;
+use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum E {
@@ -16,7 +16,7 @@ pub enum E {
     TypeError {
         type_name: String,
         param_name: String,
-        param_value: String
+        param_value: String,
     },
 
     #[error("Type {0} not supported by the proxy. Fix me! ")]
@@ -31,9 +31,8 @@ pub enum E {
         limit_name: String,
         limit_value: String,
         param_value: String,
-    }
-    // #[error("unknown data store error")]
-    // Unknown,
+    }, // #[error("unknown data store error")]
+       // Unknown
 }
 
 pub fn unsupported(text: &str) -> E {

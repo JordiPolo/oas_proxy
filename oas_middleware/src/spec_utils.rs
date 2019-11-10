@@ -1,5 +1,5 @@
+use crate::error::E;
 use openapiv3::*;
-use crate::error::{E};
 //use anyhow::{Result};
 use hyper::Method;
 use serde_yaml;
@@ -13,8 +13,12 @@ pub fn read<P: AsRef<Path>>(filename: P) -> OpenAPI {
     spec
 }
 
-pub fn path_to_operation<'a>(item: &'a mut PathItem, method: &Method) -> Result<&'a mut Operation, E> {
-    let inner = |op: &'a mut Option<Operation>| { op.as_mut().ok_or(E::MethodError(format!("{:?}", method))) };
+pub fn path_to_operation<'a>(
+    item: &'a mut PathItem,
+    method: &Method,
+) -> Result<&'a mut Operation, E> {
+    let inner =
+        |op: &'a mut Option<Operation>| op.as_mut().ok_or(E::MethodError(format!("{:?}", method)));
     match *method {
         Method::DELETE => inner(&mut item.delete),
         Method::GET => inner(&mut item.get),
@@ -23,7 +27,7 @@ pub fn path_to_operation<'a>(item: &'a mut PathItem, method: &Method) -> Result<
         Method::PATCH => inner(&mut item.patch),
         Method::POST => inner(&mut item.post),
         Method::PUT => inner(&mut item.put),
-        _ => unimplemented!("Method not supported")
+        _ => unimplemented!("Method not supported"),
     }
 }
 
@@ -39,5 +43,3 @@ pub fn parameter_to_parameter_data(parameter: &mut Parameter) -> &mut ParameterD
 pub fn used(description: &mut Option<String>) {
     *description = Some("1".to_string());
 }
-
-

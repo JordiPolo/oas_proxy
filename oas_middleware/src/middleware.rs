@@ -11,21 +11,21 @@ use std::path::Path;
 
 use openapi_deref::deref_all;
 
-use crate::validator;
 use crate::request;
 use crate::spec_utils;
+use crate::validator;
 
-
-pub struct OASMiddleware{//<'a> {
-  //  spec: OpenAPI,
-    request_builder: request::RequestBuilder,//<'a>,
+pub struct OASMiddleware {
+    //<'a> {
+    //  spec: OpenAPI,
+    request_builder: request::RequestBuilder, //<'a>,
 }
 impl OASMiddleware {
     pub fn new<P: AsRef<Path>>(filename: P) -> Self {
         let spec = deref_all(spec_utils::read(filename));
         let request_builder = request::RequestBuilder::new(spec);
         OASMiddleware {
-         //   spec,
+            //   spec,
             request_builder,
         }
     }
@@ -98,7 +98,7 @@ impl Middleware for OASMiddleware {
         info!("New request to {}", req.uri());
 
         if req.uri().path() == "/report" {
-//            render_report(&self.request_builder);
+            //            render_report(&self.request_builder);
             let spec = format!("{:?}", &self.request_builder);
             let ok: Response<Body> = Response::new(Body::from(spec));
             return Ok(RespondWith(ok));
@@ -112,9 +112,7 @@ impl Middleware for OASMiddleware {
             )
         })?;
 
-
         debug!("Request {:?}", request);
-
 
         match validator::validate(&mut request) {
             Ok(()) => {

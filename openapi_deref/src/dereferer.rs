@@ -1,5 +1,5 @@
-use openapiv3::*;
 use crate::error::DerefError;
+use openapiv3::*;
 
 pub fn deref_all(mut spec: OpenAPI) -> OpenAPI {
     let ein_spec = spec.clone(); //hack
@@ -47,8 +47,6 @@ pub fn deref_mut<T>(the_ref: &mut ReferenceOr<T>) -> &mut T {
     }
 }
 
-
-
 fn deref_all_params(parameters: &mut Vec<ReferenceOr<Parameter>>, spec: &OpenAPI) {
     for parameter in parameters.iter_mut() {
         match parameter {
@@ -81,7 +79,6 @@ fn operation_list<'a>(item: &'a mut PathItem) -> Vec<&'a mut Operation> {
     result
 }
 
-
 fn find_parameter_reference(spec: &OpenAPI, reference: &str) -> Result<Parameter, DerefError> {
     //debug!("Searching for reference {}", reference);
     let reference_name: &str = reference.rsplit('/').nth(0).unwrap();
@@ -106,5 +103,3 @@ fn find_parameter_reference(spec: &OpenAPI, reference: &str) -> Result<Parameter
         ReferenceOr::Item(item) => Ok(item.clone()),
     }
 }
-
-

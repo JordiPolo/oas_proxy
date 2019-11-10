@@ -1,10 +1,10 @@
 use crate::error::{maximum_error, minimum_error, type_error};
 
 use crate::error::E;
+use chrono::{DateTime, FixedOffset};
 use openapiv3::*;
 use std::ops::Range;
 use uuid::Uuid;
-use chrono::{DateTime, FixedOffset};
 
 use crate::request::Attribute;
 
@@ -105,8 +105,6 @@ fn get_integer_limits(contract: &IntegerType) -> Range<i64> {
         end: the_max,
     }
 }
-
-
 
 fn check_integer(attribute: &Attribute, integer_type: &IntegerType) -> Result<(), E> {
     let number = read_integer(attribute, &integer_type)?;
