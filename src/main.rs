@@ -3,7 +3,7 @@ extern crate http;
 extern crate serde;
 extern crate simple_proxy;
 
-use simple_proxy::middlewares::{Health, Logger};
+use simple_proxy::middlewares::{Health};
 use simple_proxy::{Environment, SimpleProxy};
 use oas_middleware::OASMiddleware;
 
@@ -46,7 +46,7 @@ fn main() {
 
     let mut proxy = SimpleProxy::new(config.port, config.backend, Environment::Development);
     let health = Health::new("/health", "OK !");
-    let logger = Logger::new();
+//    let logger = Logger::new();
     let oas_validator = OASMiddleware::new(&config.input);
 
     // Order matters

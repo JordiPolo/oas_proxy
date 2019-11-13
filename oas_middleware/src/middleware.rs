@@ -17,16 +17,15 @@ use crate::validator;
 use crate::usage_report;
 
 pub struct OASMiddleware {
-    //<'a> {
-    //  spec: OpenAPI,
-    request_builder: request::RequestBuilder, //<'a>,
+    request_builder: request::RequestBuilder,
 }
 impl OASMiddleware {
     pub fn new<P: AsRef<Path>>(filename: P) -> Self {
         let spec = deref_all(spec_utils::read(filename));
         let request_builder = request::RequestBuilder::new(spec);
+        debug!("{:?}", request_builder);
+
         OASMiddleware {
-            //   spec,
             request_builder,
         }
     }
@@ -69,6 +68,8 @@ impl Middleware for OASMiddleware {
         }
 
         let mut request = self.request_builder.build(&req).map_err(|error| {
+            info!("Failed to create request. Not proxying");
+            info!("{:?}", error);
             MiddlewareError::new(
                 String::from("Request information not found in the OpenAPI file."),
                 Some(error_to_json(error, req.uri())),

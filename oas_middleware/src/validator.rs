@@ -41,7 +41,7 @@ fn find_param<'a>(operation: &'a mut Operation, param_name: &str) -> Result<&'a 
         let param = deref_mut(parameter);
         let mut param_data = spec_utils::parameter_to_parameter_data_mut(param);
         if param_data.name == param_name {
-            error!("Used! {}", param_name);
+            info!("Used! {}", param_name);
             param_data.description = Some("1".to_string());
             spec_utils::used(&mut param_data.description);
             return Ok(param_data);

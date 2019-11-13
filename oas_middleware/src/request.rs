@@ -127,7 +127,10 @@ impl RequestBuilder {
             if [c] == "}".as_bytes() {
                 in_var = true;
                 rstr.push(b">"[0]);
-                rstr.push(b"."[0]);
+                rstr.push(b"["[0]); // Match anything but forward slash
+                rstr.push(b"^"[0]); // So we do not match long urls, only one variable
+                rstr.push(b"/"[0]);
+                rstr.push(b"]"[0]);
                 rstr.push(b"*"[0]);
                 rstr.push(b")"[0]);
             }
@@ -145,7 +148,14 @@ impl RequestBuilder {
     fn base_path(server: &Server) -> String {
         if let Some(variables) = &server.variables {
             match variables.get("basePath") {
-                Some(base_path) => base_path.default.clone(),
+                Some(base_path) => {
+                    let mut base_str = base_path.default.clone();
+                    let last_character = base_str.chars().last().unwrap();
+                    if last_character == '/' {
+                        base_str.pop();
+                    }
+                    base_str.clone()
+                },
                 None => "".to_string(),
             }
         } else {

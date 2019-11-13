@@ -14,16 +14,16 @@ pub fn check_type(the_type: &Type, request_param_data: &Attribute) -> Result<(),
             VariantOrUnknownOrEmpty::Item(string_format) => match string_format {
                 StringFormat::Date => check_date(&request_param_data),
                 StringFormat::DateTime => check_datetime(&request_param_data),
-                _ => Ok(()),
+                _ => Err(E::TypeNotsupported("String format".to_string())), //Ok(()),
             },
             VariantOrUnknownOrEmpty::Unknown(string) => {
                 if string == "uuid" {
                     check_uuid(&request_param_data)
                 } else {
-                    Ok(())
+                    check_plain_string(&request_param_data)
                 }
             }
-            VariantOrUnknownOrEmpty::Empty => Err(E::TypeNotsupported(format!("{:?}", format))),
+            VariantOrUnknownOrEmpty::Empty => check_plain_string(&request_param_data),
         },
         Type::Integer(integer_type) => check_integer(request_param_data, integer_type),
         Type::Number(number_type) => check_number(request_param_data, number_type),
@@ -159,4 +159,18 @@ fn check_datetime(attribute: &Attribute) -> Result<(), E> {
         Ok(_) => Ok(()),
         Err(_) => Err(type_error("Datetime", &attribute)),
     }
+}
+
+fn reverse_result(a: Result<(), E>, attribute: &Attribute) -> Result<(), E> {
+    match a {
+        Ok(_) => Err(type_error("string without format", &attribute)),
+        Err(_) => Ok(())
+    }
+}
+
+fn check_plain_string(attribute: &Attribute) -> Result<(), E> {
+    reverse_result(check_boolean(attribute), &attribute)
+        .and(reverse_result(check_uuid(attribute), &attribute))
+        .and(reverse_result(check_date(attribute), &attribute))
+        .and(reverse_result(check_datetime(attribute), &attribute))
 }

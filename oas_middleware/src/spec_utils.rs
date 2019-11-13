@@ -17,6 +17,7 @@ pub fn path_to_operation<'a>(
     item: &'a mut PathItem,
     method: &Method,
 ) -> Result<&'a mut Operation, E> {
+    debug!("item {:?}", item);
     let inner =
         |op: &'a mut Option<Operation>| op.as_mut().ok_or(E::MethodError(format!("{:?}", method)));
     match *method {
