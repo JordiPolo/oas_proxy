@@ -39,7 +39,7 @@ fn find_param<'a>(operation: &'a mut Operation, param_name: &str) -> Result<&'a 
     for parameter2 in mutable_params {
         let parameter: &mut ReferenceOr<Parameter> = parameter2;
         let param = deref_mut(parameter);
-        let mut param_data = spec_utils::parameter_to_parameter_data(param);
+        let mut param_data = spec_utils::parameter_to_parameter_data_mut(param);
         if param_data.name == param_name {
             error!("Used! {}", param_name);
             param_data.description = Some("1".to_string());

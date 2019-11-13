@@ -11,8 +11,8 @@ use openapi_deref::deref_own;
 
 #[derive(Debug)]
 pub struct PathMatcher {
-    regex: Regex,
-    path: PathItem,
+    pub regex: Regex,
+    pub path: PathItem,
 }
 
 #[derive(Default, Debug)]

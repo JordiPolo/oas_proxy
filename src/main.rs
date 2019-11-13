@@ -52,7 +52,7 @@ fn main() {
     // Order matters
     proxy.add_middleware(Box::new(health));
     proxy.add_middleware(Box::new(oas_validator));
-    proxy.add_middleware(Box::new(logger));
+   // proxy.add_middleware(Box::new(logger));
 
     // Start proxy
     proxy.run();

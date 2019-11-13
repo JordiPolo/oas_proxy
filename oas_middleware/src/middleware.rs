@@ -9,11 +9,12 @@ use http::uri::Uri;
 use serde_json::json;
 use std::path::Path;
 
-use openapi_deref::deref_all;
+use openapi_deref::{deref_all};
 
 use crate::request;
 use crate::spec_utils;
 use crate::validator;
+use crate::usage_report;
 
 pub struct OASMiddleware {
     //<'a> {
@@ -43,46 +44,7 @@ fn error_to_json(error: Error, uri: &Uri) -> String {
     })
     .to_string()
 }
-
-/*
-use std::collections::HashMap;
-
-struct UsedSpec {
-    spec: HashMap<String, Vec<UsedMethod>>,
-}
-
-struct UsedMethod {
-used: bool,
-method: String,
-parameters: Vec<UsedParam>,
-body: HashMap<String, UsedSchema>,
-responses: HashMap<String, UsedSchema>,
-}
-
-struct UsedSchema {
-    used: bool,
-    properties: Vec<UsedProperty>
-}
-
-
-struct UsedProperty {
-    used: bool,
-    name: String,
-}
-
-struct UsedParam {
-    used: bool,
-    name: String,
-    location: String,
-}
-
-fn render_report(builder: &request::RequestBuilder) -> UsedSpec {
-    let mut paths = HashMap::new();
-    for path_match in builder.path_matches {
-        let methods = Vec::new();
-    }
-}
-*/
+use hyper::header::HeaderValue;
 
 impl Middleware for OASMiddleware {
     fn name() -> String {
@@ -98,10 +60,12 @@ impl Middleware for OASMiddleware {
         info!("New request to {}", req.uri());
 
         if req.uri().path() == "/report" {
-            //            render_report(&self.request_builder);
-            let spec = format!("{:?}", &self.request_builder);
-            let ok: Response<Body> = Response::new(Body::from(spec));
-            return Ok(RespondWith(ok));
+            let usage_report = usage_report::render_report(&self.request_builder);
+            let mut response: Response<Body> = Response::new(Body::from(usage_report));
+            response.headers_mut().insert(
+                "Content-Type", HeaderValue::from_str("application/json").unwrap()
+            );
+            return Ok(RespondWith(response));
         }
 
         let mut request = self.request_builder.build(&req).map_err(|error| {
@@ -117,6 +81,8 @@ impl Middleware for OASMiddleware {
         match validator::validate(&mut request) {
             Ok(()) => {
                 info!("Proxying");
+                let headers = req.headers_mut();
+                headers.insert("OAS-Proxied", HeaderValue::from_str("true").unwrap());
                 Ok(Next)
             }
             Err(error) => {
