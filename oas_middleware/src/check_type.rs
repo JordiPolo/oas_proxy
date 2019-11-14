@@ -5,6 +5,7 @@ use chrono::{DateTime, FixedOffset};
 use openapiv3::*;
 use std::ops::Range;
 use uuid::Uuid;
+use regex::Regex;
 
 use crate::request::Attribute;
 
@@ -14,6 +15,7 @@ pub fn check_type(the_type: &Type, request_param_data: &Attribute) -> Result<(),
             VariantOrUnknownOrEmpty::Item(string_format) => match string_format {
                 StringFormat::Date => check_date(&request_param_data),
                 StringFormat::DateTime => check_datetime(&request_param_data),
+                StringFormat::Byte => check_base64(&request_param_data),
                 _ => Err(E::TypeNotsupported("String format".to_string())), //Ok(()),
             },
             VariantOrUnknownOrEmpty::Unknown(string) => {
@@ -161,6 +163,17 @@ fn check_datetime(attribute: &Attribute) -> Result<(), E> {
     }
 }
 
+fn check_base64(attribute: &Attribute) -> Result<(), E> {
+    let string = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$";
+    let regex = Regex::new(&string).expect("Could not create base64 regex");
+
+    match regex.is_match(&attribute.value) {
+        true => Ok(()),
+        false => Err(type_error("Base64 string", &attribute)),
+    }
+}
+
+
 fn reverse_result(a: Result<(), E>, attribute: &Attribute) -> Result<(), E> {
     match a {
         Ok(_) => Err(type_error("string without format", &attribute)),
@@ -168,6 +181,7 @@ fn reverse_result(a: Result<(), E>, attribute: &Attribute) -> Result<(), E> {
     }
 }
 
+// TODO Check the format is not numeral or integer
 fn check_plain_string(attribute: &Attribute) -> Result<(), E> {
     reverse_result(check_boolean(attribute), &attribute)
         .and(reverse_result(check_uuid(attribute), &attribute))

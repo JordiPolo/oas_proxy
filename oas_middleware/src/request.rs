@@ -90,12 +90,6 @@ impl RequestBuilder {
         })
     }
 
-    // fn operation_from_request(&mut self, mut path: &str) -> Operation {
-    //     let mut path_item = deref(&mut self.find_path(&mut path).unwrap().path);
-    //     let (_, operation) = spec_utils::path_to_operation3(&mut path_item);
-    //     operation.clone()
-    // }
-
     fn find_path<'a>(&'a mut self, path: &str) -> Result<&'a mut PathMatcher, E> {
         let found = self
             .path_matches
