@@ -32,16 +32,16 @@ pub fn path_to_operation<'a>(
     }
 }
 
-pub fn operation_list(item: &PathItem) -> Vec<&Operation> {
+pub fn operation_list(item: &PathItem) -> Vec<(&str, &Operation)> {
     let mut result = Vec::new();
-    result.push(&item.delete);
-    result.push(&item.get);
-    result.push(&item.head);
-    result.push(&item.options);
-    result.push(&item.patch);
-    result.push(&item.post);
-    result.push(&item.put);
-    result.iter().filter(|x| x.is_some()).map(|a| a.as_ref().unwrap()).collect()
+    result.push(("delete", &item.delete));
+    result.push(("get", &item.get));
+    result.push(("head", &item.head));
+    result.push(("options", &item.options));
+    result.push(("patch", &item.patch));
+    result.push(("post", &item.post));
+    result.push(("put", &item.put));
+    result.iter().filter(|(_n, o)| o.is_some()).map(|(name, oper)| (*name, oper.as_ref().unwrap())).collect()
 }
 
 pub fn parameter_location(parameter: &Parameter) -> String {

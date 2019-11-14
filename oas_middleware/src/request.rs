@@ -1,23 +1,21 @@
 use hyper::Uri;
 use openapiv3::*;
 use regex::Regex;
-
 use anyhow::Result;
 
 use crate::error::E;
 use crate::spec_utils;
-
 use openapi_deref::deref_own;
+
+#[derive(Default, Debug)]
+pub struct RequestBuilder {
+    pub path_matches: Vec<PathMatcher>,
+}
 
 #[derive(Debug)]
 pub struct PathMatcher {
     pub regex: Regex,
     pub path: PathItem,
-}
-
-#[derive(Default, Debug)]
-pub struct RequestBuilder {
-    pub path_matches: Vec<PathMatcher>,
 }
 
 #[derive(Debug)]
@@ -33,9 +31,30 @@ pub struct Attribute {
     pub name: String,
     pub value: String,
 }
+impl Attribute {
+    fn new(name: &str, value: &str) -> Attribute {
+        Attribute {
+            name: name.to_string(),
+            value: value.to_string(),
+        }
+    }
+}
+
 
 pub type Params = Vec<Attribute>;
 
+/// Returns a list of query params from a string
+/// # Examples
+///
+/// ```
+/// let input = Some("user=me&role=root");
+/// let output = Some(vec![Attribute::new("user","me"), Attribute::new("role", "root")]);
+/// assert_eq!(query_variables(&input), &output);
+/// ```
+///
+/// ```
+/// assert_eq!(query_variables(&None), &None);
+/// ```
 fn query_variables(q: &Option<&str>) -> Option<Params> {
     q.map(|query| {
         query
@@ -45,24 +64,28 @@ fn query_variables(q: &Option<&str>) -> Option<Params> {
             .flat_map(|pair| {
                 pair.find('=') // This returns an option, since '=' might not exist
                     .map(|idx| pair.split_at(idx)) // split it into (&str, &str)
-                    .map(|(a, b)| Attribute {
-                        name: a.to_string(),
-                        value: b[1..].to_string(),
-                    }) // Since split includes the '=' char, remove it.
+                    .map(|(a, b)| Attribute::new(a, &b[1..])) // Since split includes the '=' char, remove it.
             })
             .collect()
     })
 }
 
+/// Returns a list of path params from a string and a regex
+/// # Examples
+///
+/// ```
+/// let path = "/v1/users/username/action";
+/// let regex = ...
+/// let output = ...
+/// assert_eq!(path_variables(&regex, path), output)
+/// ```
+///
 fn path_variables(regex: &Regex, path: &str) -> Option<Params> {
     let mut variables = Vec::new();
+    let captures = regex.captures(&path).unwrap();
     for n in regex.capture_names() {
         if let Some(name) = n {
-            let captures = regex.captures(&path).unwrap();
-            variables.push(Attribute {
-                name: name.to_string(),
-                value: captures.name(&name).unwrap().as_str().to_string(),
-            });
+            variables.push(Attribute::new(name, captures.name(&name).unwrap().as_str()));
         }
     }
     Some(variables)
@@ -91,11 +114,19 @@ impl RequestBuilder {
     }
 
     fn find_path<'a>(&'a mut self, path: &str) -> Result<&'a mut PathMatcher, E> {
-        let found = self
+        let mut paths: Vec<&mut PathMatcher> = self
             .path_matches
             .iter_mut()
-            .find(|path_match| path_match.regex.is_match(&path));
-        found.ok_or(E::PathError(path.to_string()))
+            .filter(|path_match| path_match.regex.is_match(&path))
+            .collect();
+
+        match paths.len() {
+            0 => Err(E::PathError(path.to_string())),
+            1 => Ok(paths.pop().unwrap()),
+            // /users/<user_id> and /users/copy regexes would match /users/copy path.
+            // We choose the most specific one, the one less variable captures.
+            _ => Ok(paths.into_iter().min_by_key(|path| path.regex.captures_len()).unwrap())
+        }
     }
 
     ///
@@ -104,7 +135,7 @@ impl RequestBuilder {
     ///
     /// let result = oas_middleware::validator::spec_path_to_regex_str("/study/{uuid}/test");
     /// assert_eq!(result, "^/study/(?P<uuid>.*)/test$");
-    /// ```
+    ///
     fn spec_path_to_regex_str(path: &str) -> regex::Regex {
         let mut in_var = false;
 

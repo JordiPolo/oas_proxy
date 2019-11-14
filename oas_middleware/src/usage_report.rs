@@ -49,7 +49,7 @@ fn usage_summary(builder: &request::RequestBuilder) -> UsedSpec {
     for path_match in &builder.path_matches {
         //let path = path_match.path.clone();
         let mut methods = Vec::new();
-        for operation in spec_utils::operation_list(&path_match.path) {
+        for (name, operation) in spec_utils::operation_list(&path_match.path) {
             let mut params = Vec::new();
             for parameter in &operation.parameters {
                 //  parameter_location
@@ -64,7 +64,7 @@ fn usage_summary(builder: &request::RequestBuilder) -> UsedSpec {
             }
             methods.push(UsedMethod {
                 used: is_used(&operation.description),
-                method: "name".to_string(),
+                method: name.to_string(),
                 parameters: params,
                 body: HashMap::new(),
                 responses: HashMap::new(),
