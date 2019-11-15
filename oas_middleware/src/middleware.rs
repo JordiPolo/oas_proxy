@@ -8,6 +8,7 @@ use anyhow::Error;
 use http::uri::Uri;
 use serde_json::json;
 use std::path::Path;
+use log::{info, debug};
 
 use openapi_deref::{deref_all};
 

@@ -45,7 +45,7 @@ impl Service for ProxyService {
     fn call(&mut self, req: Request<Self::ReqBody>) -> Self::Future {
         self.clear_state();
         let (mut parts, body) = req.into_parts();
-       use std::str::FromStr;
+
        let uri = http::uri::Uri::builder()
             .scheme("http")
             .authority(self.backend.clone())

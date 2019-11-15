@@ -1,4 +1,5 @@
 use openapiv3::*;
+use log::{debug};
 
 use crate::check_type;
 use crate::error::unsupported;
@@ -11,18 +12,16 @@ use openapi_deref::deref_mut;
 pub fn validate(request: &mut Request) -> Result<()> {
     let mut operation = &mut request.operation;
 
-    if let Some(variables) = &mut request.path_variables {
-        validate_variables(&mut operation, &variables).context("Failure in a path variable.")?;
-    }
+    validate_variables(&request.path_variables, &mut operation)
+        .context("Failure in a path variable.")?;
 
-    if let Some(variables) = &request.query_variables {
-        validate_variables(&mut operation, &variables).context("Failure in a query parameter.")?;
-    }
+    validate_variables(&request.query_variables, &mut operation)
+        .context("Failure in a query parameter.")?;
 
     Ok(())
 }
 
-fn validate_variables(operation: &mut Operation, variables: &Params) -> Result<()> {
+fn validate_variables(variables: &Params, operation: &mut Operation) -> Result<()> {
     variables
         .iter()
         .map(|variable| {
@@ -41,7 +40,7 @@ fn find_param<'a>(operation: &'a mut Operation, param_name: &str) -> Result<&'a 
         let param = deref_mut(parameter);
         let mut param_data = spec_utils::parameter_to_parameter_data_mut(param);
         if param_data.name == param_name {
-            info!("Used! {}", param_name);
+            debug!("Used! {}", param_name);
             param_data.description = Some("1".to_string());
             spec_utils::used(&mut param_data.description);
             return Ok(param_data);

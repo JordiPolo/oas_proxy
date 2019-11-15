@@ -1,6 +1,3 @@
-#[macro_use]
-extern crate log;
-
 mod check_type;
 mod error;
 mod middleware;

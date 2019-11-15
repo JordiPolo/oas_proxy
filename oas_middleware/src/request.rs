@@ -1,7 +1,8 @@
+use anyhow::Result;
+use hyper::body::Body;
 use hyper::Uri;
 use openapiv3::*;
 use regex::Regex;
-use anyhow::Result;
 
 use crate::error::E;
 use crate::spec_utils;
@@ -20,8 +21,8 @@ pub struct PathMatcher {
 
 #[derive(Debug)]
 pub struct Request<'a> {
-    pub path_variables: Option<Vec<Attribute>>,
-    pub query_variables: Option<Vec<Attribute>>,
+    pub path_variables: Vec<Attribute>,
+    pub query_variables: Vec<Attribute>,
     //    pub operation: Operation,
     pub operation: &'a mut Operation,
 }
@@ -40,13 +41,13 @@ impl Attribute {
     }
 }
 
-
 pub type Params = Vec<Attribute>;
 
 /// Returns a list of query params from a string
 /// # Examples
 ///
 /// ```
+///
 /// let input = Some("user=me&role=root");
 /// let output = Some(vec![Attribute::new("user","me"), Attribute::new("role", "root")]);
 /// assert_eq!(query_variables(&input), &output);
@@ -55,9 +56,10 @@ pub type Params = Vec<Attribute>;
 /// ```
 /// assert_eq!(query_variables(&None), &None);
 /// ```
-fn query_variables(q: &Option<&str>) -> Option<Params> {
-    q.map(|query| {
-        query
+fn query_variables(q: &Option<&str>) -> Params {
+    match q {
+        None => Vec::new(),
+        Some(query) => query
             .split('&')
             // Use flat_map to filter out all malformed pairs.
             // Using map would result in a Vec<Option<(&str, &str)>>
@@ -66,36 +68,38 @@ fn query_variables(q: &Option<&str>) -> Option<Params> {
                     .map(|idx| pair.split_at(idx)) // split it into (&str, &str)
                     .map(|(a, b)| Attribute::new(a, &b[1..])) // Since split includes the '=' char, remove it.
             })
-            .collect()
-    })
+            .collect(),
+    }
 }
 
 /// Returns a list of path params from a string and a regex
 /// # Examples
 ///
-/// ```
+///
 /// let path = "/v1/users/username/action";
 /// let regex = ...
 /// let output = ...
 /// assert_eq!(path_variables(&regex, path), output)
-/// ```
 ///
-fn path_variables(regex: &Regex, path: &str) -> Option<Params> {
-    let mut variables = Vec::new();
+///
+fn path_variables(regex: &Regex, path: &str) -> Params {
     let captures = regex.captures(&path).unwrap();
-    for n in regex.capture_names() {
-        if let Some(name) = n {
-            variables.push(Attribute::new(name, captures.name(&name).unwrap().as_str()));
-        }
-    }
-    Some(variables)
+    regex
+        .capture_names() // None indicate unnamed captures, like the one for the whole string.
+        .filter_map(|n| n.map(|name| Attribute::new(name, captures.name(&name).unwrap().as_str())))
+        .collect()
 }
+// use futures::stream::Stream;
+
+// fn body_variables(body: &Body) -> Option<Params> {
+//     let data = body.concat2().wait().unwrap().into_bytes();
+//     None
+// }
 
 impl RequestBuilder {
     pub fn new(spec: OpenAPI) -> Self {
-        let path_matches = RequestBuilder::create_path_regexes(spec);
         RequestBuilder {
-            path_matches: path_matches,
+            path_matches: RequestBuilder::create_path_regexes(spec),
         }
     }
 
@@ -103,30 +107,24 @@ impl RequestBuilder {
         let path = self.find_path(request.uri().path())?;
         let path_variables = path_variables(&path.regex, &request.uri().path());
         let query_variables = query_variables(&request.uri().query());
-        //let mut path_item = deref2(path.path.clone());
         let operation = spec_utils::path_to_operation(&mut path.path, &request.method())?;
         spec_utils::used(&mut operation.description);
+        //        body_variables(request.body());
         Ok(Request {
             path_variables,
             query_variables,
-            operation: operation, //.clone(), // &mut self.operation_from_request(request.uri().path()),
+            operation,
         })
     }
 
     fn find_path<'a>(&'a mut self, path: &str) -> Result<&'a mut PathMatcher, E> {
-        let mut paths: Vec<&mut PathMatcher> = self
-            .path_matches
+        // /users/<user_id> and /users/copy regexes would match /users/copy path.
+        // We choose the most specific one, the one with minimum number of variable captures.
+        self.path_matches
             .iter_mut()
             .filter(|path_match| path_match.regex.is_match(&path))
-            .collect();
-
-        match paths.len() {
-            0 => Err(E::PathError(path.to_string())),
-            1 => Ok(paths.pop().unwrap()),
-            // /users/<user_id> and /users/copy regexes would match /users/copy path.
-            // We choose the most specific one, the one less variable captures.
-            _ => Ok(paths.into_iter().min_by_key(|path| path.regex.captures_len()).unwrap())
-        }
+            .min_by_key(|path_match| path_match.regex.captures_len())
+            .ok_or_else(|| E::PathError(path.to_string()))
     }
 
     ///
@@ -180,7 +178,7 @@ impl RequestBuilder {
                         base_str.pop();
                     }
                     base_str.clone()
-                },
+                }
                 None => "".to_string(),
             }
         } else {

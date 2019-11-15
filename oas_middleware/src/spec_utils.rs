@@ -4,6 +4,7 @@ use openapiv3::*;
 use hyper::Method;
 use serde_yaml;
 use std::path::Path;
+use log::{debug};
 
 pub fn read<P: AsRef<Path>>(filename: P) -> OpenAPI {
     let data = std::fs::read_to_string(filename).expect("OpenAPI file could not be read.");
