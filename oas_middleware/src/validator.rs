@@ -1,5 +1,7 @@
 use log::debug;
 use openapiv3::*;
+use anyhow::{Context, Result};
+use openapi_deref::deref_mut;
 
 use crate::check_type;
 use crate::error::unsupported;
@@ -7,8 +9,7 @@ use crate::error::E;
 use crate::parts::OpenAPIParts;
 use crate::request::{Attribute, Params, RequestParts};
 use crate::spec_utils;
-use anyhow::{Context, Result};
-use openapi_deref::deref_mut;
+
 
 pub fn validate(openapi_parts: &mut OpenAPIParts, request_parts: &RequestParts) -> Result<()> {
     let mut operation = &mut openapi_parts.operation;

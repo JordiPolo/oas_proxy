@@ -20,7 +20,7 @@ pub fn path_to_operation<'a>(
 ) -> Result<&'a mut Operation, E> {
     debug!("item {:?}", item);
     let inner =
-        |op: &'a mut Option<Operation>| op.as_mut().ok_or(E::MethodError(format!("{:?}", method)));
+        |op: &'a mut Option<Operation>| op.as_mut().ok_or_else(|| E::MethodError(format!("{:?}", method)));
     match *method {
         Method::DELETE => inner(&mut item.delete),
         Method::GET => inner(&mut item.get),

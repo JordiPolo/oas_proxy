@@ -39,40 +39,12 @@ impl PathFinder {
     ///
     ///
     /// let result = oas_middleware::validator::spec_path_to_regex_str("/study/{uuid}/test");
-    /// assert_eq!(result, "^/study/(?P<uuid>.*)/test$");
+    /// assert_eq!(result, "^/study/(?P<uuid>[^/]*)/test$");
     ///
-    fn spec_path_to_regex_str(path: &str) -> regex::Regex {
-        let mut in_var = false;
-
-        let mut rstr: Vec<u8> = Vec::new();
-        for c in path.bytes() {
-            if [c] == "{".as_bytes() {
-                in_var = true;
-                rstr.push(b"("[0]);
-                rstr.push(b"?"[0]);
-                rstr.push(b"P"[0]);
-                rstr.push(b"<"[0]);
-            }
-
-            if [c] == "}".as_bytes() {
-                in_var = true;
-                rstr.push(b">"[0]);
-                rstr.push(b"["[0]); // Match anything but forward slash
-                rstr.push(b"^"[0]); // So we do not match long urls, only one variable
-                rstr.push(b"/"[0]);
-                rstr.push(b"]"[0]);
-                rstr.push(b"*"[0]);
-                rstr.push(b")"[0]);
-            }
-
-            if !in_var {
-                rstr.push(c);
-            }
-            in_var = false;
-        }
-        let string = format!(r"^{}$", std::str::from_utf8(&rstr).unwrap());
-        // string
-        regex::Regex::new(&string).expect("Could not create regex")
+    fn spec_path_to_regex_str(path: &str) -> Regex {
+        let replaced = path.replace("{", "(?P<").replace("}", ">[^/]*)");
+        let string = format!(r"^{}$", replaced);
+        Regex::new(&string).expect(&format!("Could not create regex from path {}.", path))
     }
 
     fn base_path(server: &Server) -> String {

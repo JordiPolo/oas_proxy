@@ -167,9 +167,10 @@ fn check_base64(attribute: &Attribute) -> Result<(), E> {
     let string = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$";
     let regex = Regex::new(&string).expect("Could not create base64 regex");
 
-    match regex.is_match(&attribute.value) {
-        true => Ok(()),
-        false => Err(type_error("Base64 string", &attribute)),
+    if regex.is_match(&attribute.value) {
+        Ok(())
+    } else {
+        Err(type_error("Base64 string", &attribute))
     }
 }
 
