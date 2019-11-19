@@ -1,13 +1,11 @@
 use hyper::body::Body;
 use regex::Regex;
 
-
 // Body
-use futures::stream::Stream;
 use futures::future::Future;
+use futures::stream::Stream;
 use hyper::Chunk;
-use serde_json::{Value};
-
+use serde_json::Value;
 
 #[derive(Debug)]
 pub struct RequestParts {
@@ -32,20 +30,18 @@ impl Attribute {
 
 pub type Params = Vec<Attribute>;
 
-
 impl RequestParts {
     pub fn new<'a>(regex: &Regex, request: &hyper::Request<hyper::Body>) -> RequestParts {
         let path_variables = path_variables(regex, &request.uri().path());
         let query_variables = query_variables(&request.uri().query());
-       // let body = body_variables(request.into_body());
+        // let body = body_variables(request.into_body());
         RequestParts {
             path_variables,
             query_variables,
-            body:None,
+            body: None,
         }
     }
 }
-
 
 /// Returns a list of query params from a string
 /// # Examples
@@ -93,8 +89,6 @@ fn path_variables(regex: &Regex, path: &str) -> Params {
         .filter_map(|n| n.map(|name| Attribute::new(name, captures.name(&name).unwrap().as_str())))
         .collect()
 }
-
-
 
 fn body_variables(body: Body) -> Option<Value> {
     let data = body.concat2().wait().unwrap();

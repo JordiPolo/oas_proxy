@@ -3,9 +3,9 @@ use crate::error::{maximum_error, minimum_error, type_error};
 use crate::error::E;
 use chrono::{DateTime, FixedOffset};
 use openapiv3::*;
+use regex::Regex;
 use std::ops::Range;
 use uuid::Uuid;
-use regex::Regex;
 
 use crate::request::Attribute;
 
@@ -173,11 +173,10 @@ fn check_base64(attribute: &Attribute) -> Result<(), E> {
     }
 }
 
-
 fn reverse_result(a: Result<(), E>, attribute: &Attribute) -> Result<(), E> {
     match a {
         Ok(_) => Err(type_error("string without format", &attribute)),
-        Err(_) => Ok(())
+        Err(_) => Ok(()),
     }
 }
 

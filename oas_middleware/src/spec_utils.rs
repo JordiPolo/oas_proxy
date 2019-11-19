@@ -2,9 +2,9 @@ use crate::error::E;
 use openapiv3::*;
 //use anyhow::{Result};
 use hyper::Method;
+use log::debug;
 use serde_yaml;
 use std::path::Path;
-use log::{debug};
 
 pub fn read<P: AsRef<Path>>(filename: P) -> OpenAPI {
     let data = std::fs::read_to_string(filename).expect("OpenAPI file could not be read.");
@@ -42,7 +42,11 @@ pub fn operation_list(item: &PathItem) -> Vec<(&str, &Operation)> {
     result.push(("patch", &item.patch));
     result.push(("post", &item.post));
     result.push(("put", &item.put));
-    result.iter().filter(|(_n, o)| o.is_some()).map(|(name, oper)| (*name, oper.as_ref().unwrap())).collect()
+    result
+        .iter()
+        .filter(|(_n, o)| o.is_some())
+        .map(|(name, oper)| (*name, oper.as_ref().unwrap()))
+        .collect()
 }
 
 pub fn parameter_location(parameter: &Parameter) -> String {

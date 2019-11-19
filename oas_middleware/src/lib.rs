@@ -1,11 +1,11 @@
 mod check_type;
 mod error;
 mod middleware;
+mod parts;
+mod path_finder;
 mod request;
 mod spec_utils;
-mod validator;
 mod usage_report;
-mod path_finder;
-mod parts;
+mod validator;
 
 pub use middleware::OASMiddleware;

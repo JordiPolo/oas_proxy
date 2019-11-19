@@ -1,6 +1,6 @@
+use hyper::Uri;
 use openapiv3::*;
 use regex::Regex;
-use hyper::Uri;
 //use anyhow::Result;
 
 use openapi_deref::deref_own;
@@ -17,7 +17,6 @@ pub struct PathMatch {
     pub regex: Regex,
     pub path: PathItem,
 }
-
 
 impl PathFinder {
     pub fn new(spec: OpenAPI) -> Self {

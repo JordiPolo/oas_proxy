@@ -15,10 +15,10 @@ use std::path::Path;
 use openapi_deref::deref_all;
 
 use crate::path_finder::PathFinder;
+use crate::request;
 use crate::spec_utils;
 use crate::usage_report;
 use crate::validator;
-use crate::request;
 
 pub struct OASMiddleware {
     path_finder: PathFinder,
@@ -32,7 +32,6 @@ impl OASMiddleware {
         OASMiddleware { path_finder }
     }
 }
-
 
 impl Middleware for OASMiddleware {
     fn name() -> String {
@@ -57,16 +56,12 @@ impl Middleware for OASMiddleware {
             return Ok(RespondWith(response));
         }
 
-        let path = self
-            .path_finder
-            .find(req.uri().path()).unwrap(); //TODO: anyhow error here
-         //   .map_err(|error| middleware_error(error, req.uri()))?;
-
+        let path = self.path_finder.find(req.uri().path()).unwrap(); //TODO: anyhow error here
+                                                                     //   .map_err(|error| middleware_error(error, req.uri()))?;
 
         let request_parts = request::RequestParts::new(&path.regex, &req);
         let mut openapi_parts = crate::parts::OpenAPIParts::new(&mut path.path, &req)
             .map_err(|error| middleware_error(error, req.uri()))?;
-
 
         //let (openapi_parts, request_parts) = parts::get_parts(&req).map_err(|error| middleware_error(error, req.uri()))?;
 

@@ -1,11 +1,11 @@
+use log::debug;
 use openapiv3::*;
-use log::{debug};
 
 use crate::check_type;
 use crate::error::unsupported;
 use crate::error::E;
-use crate::request::{Attribute, Params, RequestParts};
 use crate::parts::OpenAPIParts;
+use crate::request::{Attribute, Params, RequestParts};
 use crate::spec_utils;
 use anyhow::{Context, Result};
 use openapi_deref::deref_mut;
