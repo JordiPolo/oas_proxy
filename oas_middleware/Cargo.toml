@@ -25,3 +25,4 @@ thiserror = "1.0"
 http = "*"
 chrono = "0.3"
 openapi_deref = { path = "../openapi_deref" }
+futures = "0.1.21"

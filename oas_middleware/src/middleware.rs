@@ -1,4 +1,6 @@
+use hyper::header::HeaderValue;
 use hyper::{Body, Request, Response, StatusCode};
+
 use simple_proxy::proxy::error::MiddlewareError;
 use simple_proxy::proxy::middleware::MiddlewareResult::{Next, RespondWith};
 use simple_proxy::proxy::middleware::{Middleware, MiddlewareResult};
@@ -6,45 +8,31 @@ use simple_proxy::proxy::service::{ServiceContext, State};
 
 use anyhow::Error;
 use http::uri::Uri;
+use log::{debug, info};
 use serde_json::json;
 use std::path::Path;
-use log::{info, debug};
 
-use openapi_deref::{deref_all};
+use openapi_deref::deref_all;
 
-use crate::request;
+use crate::path_finder::PathFinder;
 use crate::spec_utils;
-use crate::validator;
 use crate::usage_report;
+use crate::validator;
+use crate::request;
 
 pub struct OASMiddleware {
-    request_builder: request::RequestBuilder,
+    path_finder: PathFinder,
 }
 impl OASMiddleware {
     pub fn new<P: AsRef<Path>>(filename: P) -> Self {
         let spec = deref_all(spec_utils::read(filename));
-        let request_builder = request::RequestBuilder::new(spec);
-        debug!("{:?}", request_builder);
+        let path_finder = PathFinder::new(spec);
+        debug!("{:?}", path_finder);
 
-        OASMiddleware {
-            request_builder,
-        }
+        OASMiddleware { path_finder }
     }
 }
 
-fn error_to_json(error: Error, uri: &Uri) -> String {
-    let causes: Vec<String> = error.chain().map(|e| e.to_string()).collect();
-
-    json!({
-        "type": "errors:contract_broken",
-        "title": "The request does not follow the rules of the API contract.",
-        "failed_url": uri.to_string(),
-        "causes": causes,
-        "status": 422,
-    })
-    .to_string()
-}
-use hyper::header::HeaderValue;
 
 impl Middleware for OASMiddleware {
     fn name() -> String {
@@ -60,27 +48,29 @@ impl Middleware for OASMiddleware {
         info!("New request to {}", req.uri());
 
         if req.uri().path() == "/report" {
-            let usage_report = usage_report::render_report(&self.request_builder);
+            let usage_report = usage_report::render_report(&self.path_finder);
             let mut response: Response<Body> = Response::new(Body::from(usage_report));
             response.headers_mut().insert(
-                "Content-Type", HeaderValue::from_str("application/json").unwrap()
+                "Content-Type",
+                HeaderValue::from_str("application/json").unwrap(),
             );
             return Ok(RespondWith(response));
         }
 
-        let mut request = self.request_builder.build(&req).map_err(|error| {
-            info!("Failed to create request. Not proxying");
-            info!("{:?}", error);
-            MiddlewareError::new(
-                String::from("Request information not found in the OpenAPI file."),
-                Some(error_to_json(error, req.uri())),
-                StatusCode::BAD_REQUEST,
-            )
-        })?;
+        let path = self
+            .path_finder
+            .find(req.uri().path()).unwrap(); //TODO: anyhow error here
+         //   .map_err(|error| middleware_error(error, req.uri()))?;
 
-        debug!("Request {:?}", request);
 
-        match validator::validate(&mut request) {
+        let request_parts = request::RequestParts::new(&path.regex, &req);
+        let mut openapi_parts = crate::parts::OpenAPIParts::new(&mut path.path, &req)
+            .map_err(|error| middleware_error(error, req.uri()))?;
+
+
+        //let (openapi_parts, request_parts) = parts::get_parts(&req).map_err(|error| middleware_error(error, req.uri()))?;
+
+        match validator::validate(&mut openapi_parts, &request_parts) {
             Ok(()) => {
                 info!("Proxying");
                 let headers = req.headers_mut();
@@ -88,13 +78,8 @@ impl Middleware for OASMiddleware {
                 Ok(Next)
             }
             Err(error) => {
-                info!("Failed to validate. Not proxying");
-                info!("{:?}", error);
-                Err(MiddlewareError::new(
-                    String::from("Request not consistent with OpenAPI description."),
-                    Some(error_to_json(error, req.uri())),
-                    StatusCode::BAD_REQUEST,
-                ))
+                let e = error.context("Failed validation of request variables.");
+                Err(middleware_error(e, req.uri()))
             }
         }
     }
@@ -107,4 +92,27 @@ impl Middleware for OASMiddleware {
     ) -> Result<MiddlewareResult, MiddlewareError> {
         Ok(Next)
     }
+}
+
+fn middleware_error(error: Error, uri: &Uri) -> MiddlewareError {
+    info!("Failed to validate. Not proxying");
+    info!("{:?}", error);
+    MiddlewareError::new(
+        String::from("Request not consistent with OpenAPI description."),
+        Some(error_to_json(error, uri)),
+        StatusCode::BAD_REQUEST,
+    )
+}
+
+fn error_to_json(error: Error, uri: &Uri) -> String {
+    let causes: Vec<String> = error.chain().map(|e| e.to_string()).collect();
+
+    json!({
+        "type": "errors:contract_broken",
+        "title": "The request does not agree with the API contract. Not proxying.",
+        "failed_url": uri.to_string(),
+        "causes": causes,
+        "status": 422,
+    })
+    .to_string()
 }

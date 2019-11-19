@@ -4,18 +4,19 @@ use log::{debug};
 use crate::check_type;
 use crate::error::unsupported;
 use crate::error::E;
-use crate::request::{Attribute, Params, Request};
+use crate::request::{Attribute, Params, RequestParts};
+use crate::parts::OpenAPIParts;
 use crate::spec_utils;
 use anyhow::{Context, Result};
 use openapi_deref::deref_mut;
 
-pub fn validate(request: &mut Request) -> Result<()> {
-    let mut operation = &mut request.operation;
+pub fn validate(openapi_parts: &mut OpenAPIParts, request_parts: &RequestParts) -> Result<()> {
+    let mut operation = &mut openapi_parts.operation;
 
-    validate_variables(&request.path_variables, &mut operation)
+    validate_variables(&request_parts.path_variables, &mut operation)
         .context("Failure in a path variable.")?;
 
-    validate_variables(&request.query_variables, &mut operation)
+    validate_variables(&request_parts.query_variables, &mut operation)
         .context("Failure in a query parameter.")?;
 
     Ok(())

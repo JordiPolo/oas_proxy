@@ -1,7 +1,7 @@
 use serde::Serialize;
 use std::collections::HashMap;
 
-use crate::request;
+use crate::path_finder::PathFinder;
 use crate::spec_utils;
 use openapi_deref::deref;
 
@@ -38,12 +38,12 @@ struct UsedParam {
     location: String,
 }
 
-pub fn render_report(builder: &request::RequestBuilder) -> String {
+pub fn render_report(builder: &PathFinder) -> String {
     serde_json::to_string(&usage_summary(&builder))
         .expect("Not possible to render usage report. This is a bug.")
 }
 
-fn usage_summary(builder: &request::RequestBuilder) -> UsedSpec {
+fn usage_summary(builder: &PathFinder) -> UsedSpec {
     let mut spec = HashMap::new();
     //let mut paths = Vec::new();
     for path_match in &builder.path_matches {
