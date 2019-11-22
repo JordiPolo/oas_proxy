@@ -5,7 +5,7 @@ use std::fmt;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum DerefError {
     // Parameter could not be dereferenced.
-    ParamError { name: String },
+    ReferenceError { name: String },
 }
 
 impl ::std::error::Error for DerefError {
@@ -17,8 +17,8 @@ impl ::std::error::Error for DerefError {
 impl fmt::Display for DerefError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            DerefError::ParamError { ref name } => {
-                write!(f, "The paramter {} could not be dereferenced", name)
+            DerefError::ReferenceError { ref name } => {
+                write!(f, "The reference {} could not be dereferenced", name)
             }
         }
     }

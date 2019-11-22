@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 openapiv3 = "0.3.0"
 log = "*"
+indexmap = "1.3.0"

@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use crate::path_finder::PathFinder;
 use crate::spec_utils;
-use openapi_deref::deref;
+use openapi_deref::to_item_ref;
 
 #[derive(Serialize)]
 struct UsedSpec {
@@ -53,7 +53,7 @@ fn usage_summary(builder: &PathFinder) -> UsedSpec {
             let mut params = Vec::new();
             for parameter in &operation.parameters {
                 //  parameter_location
-                let param = deref(&parameter);
+                let param = to_item_ref(&parameter);
                 let param_data = spec_utils::parameter_to_parameter_data(param);
                 let used = UsedParam {
                     used: is_used(&param_data.description),

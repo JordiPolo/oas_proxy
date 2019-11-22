@@ -3,7 +3,7 @@ use openapiv3::*;
 use regex::Regex;
 //use anyhow::Result;
 
-use openapi_deref::deref_own;
+use openapi_deref::to_item;
 
 use crate::error::E;
 
@@ -76,7 +76,7 @@ impl PathFinder {
             let path = format!("{}{}", base_path, p);
             let pr = PathMatch {
                 regex: Self::spec_path_to_regex_str(&path),
-                path: deref_own(path_item),
+                path: to_item(path_item),
             };
             result.push(pr);
         }

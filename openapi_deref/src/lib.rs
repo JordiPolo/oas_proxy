@@ -1,8 +1,5 @@
-#[macro_use]
-extern crate log;
-
-pub use dereferer::{deref, deref_all, deref_mut, deref_own};
-pub use error::DerefError;
-
 mod dereferer;
 mod error;
+
+pub use dereferer::{to_item, to_item_ref, to_item_mut, deref_all};
+pub use error::DerefError;

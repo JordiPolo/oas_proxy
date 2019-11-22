@@ -1,7 +1,7 @@
 use log::debug;
 use openapiv3::*;
 use anyhow::{Context, Result};
-use openapi_deref::deref_mut;
+use openapi_deref::to_item_mut;
 
 use crate::check_type;
 use crate::error::unsupported;
@@ -39,7 +39,7 @@ fn find_param<'a>(operation: &'a mut Operation, param_name: &str) -> Result<&'a 
 
     for parameter2 in mutable_params {
         let parameter: &mut ReferenceOr<Parameter> = parameter2;
-        let param = deref_mut(parameter);
+        let param = to_item_mut(parameter);
         let mut param_data = spec_utils::parameter_to_parameter_data_mut(param);
         if param_data.name == param_name {
             debug!("Used! {}", param_name);
