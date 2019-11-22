@@ -1,6 +1,5 @@
 use crate::error::E;
 use openapiv3::*;
-//use anyhow::{Result};
 use hyper::Method;
 use log::debug;
 use serde_yaml;
@@ -47,33 +46,6 @@ pub fn operation_list(item: &PathItem) -> Vec<(&str, &Operation)> {
         .filter(|(_n, o)| o.is_some())
         .map(|(name, oper)| (*name, oper.as_ref().unwrap()))
         .collect()
-}
-
-pub fn parameter_location(parameter: &Parameter) -> String {
-    match parameter {
-        Parameter::Query { .. } => "query".to_string(),
-        Parameter::Header { .. } => "header".to_string(),
-        Parameter::Path { .. } => "path".to_string(),
-        Parameter::Cookie { .. } => "cookie".to_string(),
-    }
-}
-
-pub fn parameter_to_parameter_data(parameter: &Parameter) -> &ParameterData {
-    match parameter {
-        Parameter::Query { parameter_data, .. } => parameter_data,
-        Parameter::Header { parameter_data, .. } => parameter_data,
-        Parameter::Path { parameter_data, .. } => parameter_data,
-        Parameter::Cookie { parameter_data, .. } => parameter_data,
-    }
-}
-
-pub fn parameter_to_parameter_data_mut(parameter: &mut Parameter) -> &mut ParameterData {
-    match parameter {
-        Parameter::Query { parameter_data, .. } => parameter_data,
-        Parameter::Header { parameter_data, .. } => parameter_data,
-        Parameter::Path { parameter_data, .. } => parameter_data,
-        Parameter::Cookie { parameter_data, .. } => parameter_data,
-    }
 }
 
 pub fn used(description: &mut Option<String>) {

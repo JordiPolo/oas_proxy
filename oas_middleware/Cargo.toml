@@ -24,5 +24,5 @@ anyhow = "1.0"
 thiserror = "1.0"
 http = "*"
 chrono = "0.3"
-openapi_deref = { path = "../openapi_deref" }
+openapi_utils = { path = "../openapi_utils" }
 futures = "0.1.21"

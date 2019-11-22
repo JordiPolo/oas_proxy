@@ -3,7 +3,7 @@ use openapiv3::*;
 use regex::Regex;
 //use anyhow::Result;
 
-use openapi_deref::to_item;
+use openapi_utils::to_item;
 
 use crate::error::E;
 

@@ -12,7 +12,7 @@ use log::{debug, info};
 use serde_json::json;
 use std::path::Path;
 
-use openapi_deref::deref_all;
+use openapi_utils::deref_all;
 
 use crate::path_finder::PathFinder;
 use crate::request;

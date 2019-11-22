@@ -1,7 +1,7 @@
 use log::debug;
 use openapiv3::*;
 use anyhow::{Context, Result};
-use openapi_deref::to_item_mut;
+use openapi_utils::{ParameterExt, to_item_mut};
 
 use crate::check_type;
 use crate::error::unsupported;
@@ -33,6 +33,7 @@ fn validate_variables(variables: &Params, operation: &mut Operation) -> Result<(
         .collect()
 }
 
+
 fn find_param<'a>(operation: &'a mut Operation, param_name: &str) -> Result<&'a ParameterData> {
     debug!("Searching for parameter {}", param_name);
     let mutable_params: &mut Vec<ReferenceOr<Parameter>> = operation.parameters.as_mut();
@@ -40,7 +41,7 @@ fn find_param<'a>(operation: &'a mut Operation, param_name: &str) -> Result<&'a 
     for parameter2 in mutable_params {
         let parameter: &mut ReferenceOr<Parameter> = parameter2;
         let param = to_item_mut(parameter);
-        let mut param_data = spec_utils::parameter_to_parameter_data_mut(param);
+        let mut param_data = param.to_parameter_data_mut();
         if param_data.name == param_name {
             debug!("Used! {}", param_name);
             param_data.description = Some("1".to_string());

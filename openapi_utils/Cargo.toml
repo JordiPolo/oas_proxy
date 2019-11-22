@@ -1,5 +1,5 @@
 [package]
-name = "openapi_deref"
+name = "openapi_utils"
 version = "0.1.1"
 authors = ["Jordi Polo <mumismo@gmail.com>"]
 edition = "2018"
