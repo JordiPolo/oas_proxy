@@ -7,6 +7,8 @@ pub trait ParameterExt {
 }
 
 impl ParameterExt for Parameter {
+    /// Returns a string representing the enum of the parameter
+    /// Parameter::Query becomes "query".
     fn location_string(&self) -> String {
         match self {
             Parameter::Query { .. } => "query".to_string(),
@@ -16,6 +18,8 @@ impl ParameterExt for Parameter {
         }
     }
 
+    /// Convenience method to access the internal parameter data
+    /// independent from the kind of parameter we are using.
     fn to_parameter_data(&self) -> &ParameterData {
         match self {
             Parameter::Query { parameter_data, .. } => parameter_data,
@@ -25,6 +29,8 @@ impl ParameterExt for Parameter {
         }
     }
 
+    /// Convenience method to access the internal parameter data
+    /// independent from the kind of paramete we are using, mutable context.
     fn to_parameter_data_mut(&mut self) -> &mut ParameterData {
         match self {
             Parameter::Query { parameter_data, .. } => parameter_data,

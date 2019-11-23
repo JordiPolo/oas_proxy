@@ -1,9 +1,9 @@
-use hyper::Uri;
 use openapiv3::*;
 use regex::Regex;
 //use anyhow::Result;
 
-use openapi_utils::to_item;
+use openapi_utils::ReferenceOrExt;
+use openapi_utils::ServerExt;
 
 use crate::error::E;
 
@@ -47,36 +47,15 @@ impl PathFinder {
         Regex::new(&string).expect(&format!("Could not create regex from path {}.", path))
     }
 
-    fn base_path(server: &Server) -> String {
-        if let Some(variables) = &server.variables {
-            match variables.get("basePath") {
-                Some(base_path) => {
-                    let mut base_str = base_path.default.clone();
-                    let last_character = base_str.chars().last().unwrap();
-                    if last_character == '/' {
-                        base_str.pop();
-                    }
-                    base_str.clone()
-                }
-                None => "".to_string(),
-            }
-        } else {
-            let url_parse = &server.url.parse::<Uri>();
-            match url_parse {
-                Ok(url) => url.path().to_string(),
-                Err(_) => "".to_string(),
-            }
-        }
-    }
 
     fn create_path_regexes(spec: OpenAPI) -> Vec<PathMatch> {
         let mut result = Vec::new();
-        let base_path = Self::base_path(&spec.servers[0]);
+        let base_path = spec.servers[0].base_path();
         for (p, path_item) in spec.paths {
             let path = format!("{}{}", base_path, p);
             let pr = PathMatch {
                 regex: Self::spec_path_to_regex_str(&path),
-                path: to_item(path_item),
+                path: path_item.to_item(),
             };
             result.push(pr);
         }

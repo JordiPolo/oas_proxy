@@ -1,7 +1,7 @@
 use log::debug;
 use openapiv3::*;
 use anyhow::{Context, Result};
-use openapi_utils::{ParameterExt, to_item_mut};
+use openapi_utils::{ParameterExt, ReferenceOrExt};
 
 use crate::check_type;
 use crate::error::unsupported;
@@ -40,7 +40,7 @@ fn find_param<'a>(operation: &'a mut Operation, param_name: &str) -> Result<&'a 
 
     for parameter2 in mutable_params {
         let parameter: &mut ReferenceOr<Parameter> = parameter2;
-        let param = to_item_mut(parameter);
+        let param = parameter.to_item_mut();
         let mut param_data = param.to_parameter_data_mut();
         if param_data.name == param_name {
             debug!("Used! {}", param_name);

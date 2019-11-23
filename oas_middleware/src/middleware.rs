@@ -12,7 +12,7 @@ use log::{debug, info};
 use serde_json::json;
 use std::path::Path;
 
-use openapi_utils::deref_all;
+use openapi_utils::SpecExt;
 
 use crate::path_finder::PathFinder;
 use crate::request;
@@ -25,7 +25,7 @@ pub struct OASMiddleware {
 }
 impl OASMiddleware {
     pub fn new<P: AsRef<Path>>(filename: P) -> Self {
-        let spec = deref_all(spec_utils::read(filename));
+        let spec = spec_utils::read(filename).deref_all();
         let path_finder = PathFinder::new(spec);
         debug!("{:?}", path_finder);
 

@@ -1,14 +1,10 @@
 [package]
 name = "oas_middleware"
 version = "0.1.0"
-authors = ["jcarres-mdsol <jcarres@mdsol.com>"]
+authors = ["Jordi Polo <mumismo@gmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies.simple_proxy]
-#version = "*"
-path = "../rs-simple-proxy"
 
 [dependencies]
 hyper = "0.12.0"
@@ -24,5 +20,6 @@ anyhow = "1.0"
 thiserror = "1.0"
 http = "*"
 chrono = "0.3"
-openapi_utils = { path = "../openapi_utils" }
 futures = "0.1.21"
+openapi_utils = { path = "../openapi_utils" }
+simple_proxy = { path = "../rs-simple-proxy" }
