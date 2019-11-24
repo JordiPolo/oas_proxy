@@ -1,5 +1,5 @@
-use openapiv3::*;
 use http::Uri;
+use openapiv3::*;
 
 pub trait ServerExt {
     fn base_path(&self) -> String;

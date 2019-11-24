@@ -4,10 +4,11 @@ use crate::error::E;
 use chrono::{DateTime, FixedOffset};
 use openapiv3::*;
 use regex::Regex;
-use std::ops::Range;
 use uuid::Uuid;
 
 use crate::request::Attribute;
+
+use openapi_utils::IntegerTypeExt;
 
 pub fn check_type(the_type: &Type, request_param_data: &Attribute) -> Result<(), E> {
     match the_type {
@@ -80,37 +81,10 @@ fn read_float(attribute: &Attribute, integer_type: &NumberType) -> Result<f64, E
     }
 }
 
-fn get_integer_limits(contract: &IntegerType) -> Range<i64> {
-    let the_min = match contract.minimum {
-        Some(minimum) => {
-            if contract.exclusive_minimum {
-                minimum + 1
-            } else {
-                minimum
-            }
-        }
-        None => std::i64::MIN,
-    };
-
-    let the_max = match contract.maximum {
-        Some(maximum) => {
-            if contract.exclusive_maximum {
-                maximum - 1
-            } else {
-                maximum
-            }
-        }
-        None => std::i64::MAX,
-    };
-    std::ops::Range {
-        start: the_min,
-        end: the_max,
-    }
-}
 
 fn check_integer(attribute: &Attribute, integer_type: &IntegerType) -> Result<(), E> {
     let number = read_integer(attribute, &integer_type)?;
-    let min_max = get_integer_limits(&integer_type);
+    let min_max = integer_type.limits();
 
     if !integer_type.enumeration.is_empty() {
         integer_type.enumeration.contains(&number);

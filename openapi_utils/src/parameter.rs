@@ -1,5 +1,31 @@
 use openapiv3::*;
 
+pub trait ParameterDataExt {
+    fn get_type(&self) -> &Type;
+}
+
+impl ParameterDataExt for ParameterData {
+    fn get_type(&self) -> &Type {
+        match &self.format {
+            ParameterSchemaOrContent::Schema(reference) => match reference {
+                ReferenceOr::Reference { reference: _ } => {
+                    unimplemented!("References inside schemas are not supported")
+                }
+                ReferenceOr::Item(item) => match &item.schema_kind {
+                    SchemaKind::Type(schema_type) => schema_type,
+                    SchemaKind::OneOf { .. } => unimplemented!("OneOf not supported"),
+                    SchemaKind::AnyOf { .. } => unimplemented!("AnyOf not supported"),
+                    SchemaKind::AllOf { .. } => unimplemented!("AllOf not supported"),
+                    SchemaKind::Any(_) => unimplemented!("Any not supported"),
+                },
+            },
+            ParameterSchemaOrContent::Content(_content) => {
+                unimplemented!("Not quite understand this one")
+            }
+        }
+    }
+}
+
 pub trait ParameterExt {
     fn location_string(&self) -> String;
     fn to_parameter_data(&self) -> &ParameterData;

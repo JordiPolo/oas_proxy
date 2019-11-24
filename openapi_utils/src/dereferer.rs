@@ -1,7 +1,7 @@
 use crate::error::DerefError;
-use openapiv3::*;
-use indexmap::IndexMap;
 use crate::reference::ReferenceOrExt;
+use indexmap::IndexMap;
+use openapiv3::*;
 
 pub trait SpecExt {
     fn deref_all(self) -> OpenAPI;
@@ -12,23 +12,19 @@ impl SpecExt for OpenAPI {
     /// the items in the place of the references.
     fn deref_all(mut self) -> OpenAPI {
         let components = self
-        .components
-        .as_ref()
-        .expect("Dereferenciation needs `components` to be present in the file.");
+            .components
+            .as_ref()
+            .expect("Dereferenciation needs `components` to be present in the file.");
 
         for (_, path_item) in &mut self.paths {
             deref_everything_in_path(path_item, &components);
         }
-    //    println!("{:?}", spec);
-       self
+        //    println!("{:?}", spec);
+        self
     }
 }
 
-
-
-
 fn deref_everything_in_path(path_item: &mut ReferenceOr<PathItem>, components: &Components) {
-
     let p_item = path_item.to_item_mut(); //TODO: no Deref possible? Where in components?
     set_deref_all_params(&mut p_item.parameters, &components);
 
@@ -66,7 +62,6 @@ fn deref_everything_in_path(path_item: &mut ReferenceOr<PathItem>, components: &
                 set_defer_schema_contents(schema.to_item_mut(), components, 10);
             }
         }
-
     }
 }
 
@@ -75,40 +70,48 @@ fn set_defer_schema_contents(schema: &mut Schema, components: &Components, recur
         return;
     }
     match &mut schema.schema_kind {
-        SchemaKind::Type(schema_type) => {
-            match schema_type {
-                Type::Object(object) => {
-                    for (_name, mut property) in &mut object.properties {
-                        set_deref_box(&mut property, &components.schemas);
-                        set_defer_schema_contents(&mut property.to_item_mut(), components, recursion - 1);
-                    }
-                },
-                Type::Array(array) => {
-                    set_deref_box(&mut array.items, &components.schemas);
-                    set_defer_schema_contents(&mut array.items.to_item_mut(), components, recursion - 1);
-                },
-                _ => { return; }
+        SchemaKind::Type(schema_type) => match schema_type {
+            Type::Object(object) => {
+                for (_name, mut property) in &mut object.properties {
+                    set_deref_box(&mut property, &components.schemas);
+                    set_defer_schema_contents(
+                        &mut property.to_item_mut(),
+                        components,
+                        recursion - 1,
+                    );
+                }
             }
-        }
+            Type::Array(array) => {
+                set_deref_box(&mut array.items, &components.schemas);
+                set_defer_schema_contents(
+                    &mut array.items.to_item_mut(),
+                    components,
+                    recursion - 1,
+                );
+            }
+            _ => {
+                return;
+            }
+        },
 
         SchemaKind::OneOf { ref mut one_of } => {
             for mut sch in &mut one_of.iter_mut() {
                 set_deref(&mut sch, &components.schemas);
-                set_defer_schema_contents(&mut sch.to_item_mut(), components, recursion -1 );
+                set_defer_schema_contents(&mut sch.to_item_mut(), components, recursion - 1);
             }
-        },
+        }
         SchemaKind::AnyOf { ref mut any_of } => {
             for mut sch in &mut any_of.iter_mut() {
                 set_deref(&mut sch, &components.schemas);
-                set_defer_schema_contents(&mut sch.to_item_mut(), components, recursion -1 );
+                set_defer_schema_contents(&mut sch.to_item_mut(), components, recursion - 1);
             }
-        },
+        }
         SchemaKind::AllOf { ref mut all_of } => {
             for mut sch in &mut all_of.iter_mut() {
                 set_deref(&mut sch, &components.schemas);
-                set_defer_schema_contents(&mut sch.to_item_mut(), components, recursion -1 );
+                set_defer_schema_contents(&mut sch.to_item_mut(), components, recursion - 1);
             }
-        },
+        }
         SchemaKind::Any(schema) => {
             for (_name, mut property) in &mut schema.properties {
                 set_deref_box(&mut property, &components.schemas);
@@ -123,35 +126,47 @@ fn set_defer_schema_contents(schema: &mut Schema, components: &Components, recur
     }
 }
 
-
 fn set_deref_all_params(parameters: &mut Vec<ReferenceOr<Parameter>>, components: &Components) {
     for parameter in parameters.iter_mut() {
         set_deref(parameter, &components.parameters);
     }
 }
 
-
-fn set_deref<'a, T>(item: &'a mut ReferenceOr<T>, component_type: &IndexMap<String, ReferenceOr<T>>) where T:Clone {
+fn set_deref<'a, T>(item: &'a mut ReferenceOr<T>, component_type: &IndexMap<String, ReferenceOr<T>>)
+where
+    T: Clone,
+{
     match item {
         ReferenceOr::Reference { reference } => {
             let p = find_reference(reference, component_type).expect("No Reference found!");
             *item = ReferenceOr::Item(p);
         }
-        ReferenceOr::Item(_) => {  }
+        ReferenceOr::Item(_) => {}
     }
 }
 
-fn set_deref_box<'a, T>(item: &'a mut ReferenceOr<Box<T>>, component_type: &IndexMap<String, ReferenceOr<T>>) where T:Clone {
+fn set_deref_box<'a, T>(
+    item: &'a mut ReferenceOr<Box<T>>,
+    component_type: &IndexMap<String, ReferenceOr<T>>,
+) where
+    T: Clone,
+{
     match item {
         ReferenceOr::Reference { reference } => {
             let p = find_reference(reference, component_type).expect("No Reference found!");
             *item = ReferenceOr::Item(Box::new(p));
         }
-        ReferenceOr::Item(_) => {  }
+        ReferenceOr::Item(_) => {}
     }
 }
 
-fn find_reference<T>(reference: &str, component_type: &IndexMap<String, ReferenceOr<T>>) -> Result<T, DerefError> where T:Clone {
+fn find_reference<T>(
+    reference: &str,
+    component_type: &IndexMap<String, ReferenceOr<T>>,
+) -> Result<T, DerefError>
+where
+    T: Clone,
+{
     let reference_name: &str = reference.rsplit('/').nth(0).unwrap();
 
     let ref_item = component_type
@@ -167,7 +182,6 @@ fn find_reference<T>(reference: &str, component_type: &IndexMap<String, Referenc
         ReferenceOr::Item(item) => Ok(item.clone()),
     }
 }
-
 
 fn operation_list<'a>(item: &'a mut PathItem) -> Vec<&'a mut Operation> {
     let mut result = Vec::new();
