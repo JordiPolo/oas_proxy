@@ -32,15 +32,16 @@ fn validate_variables(variables: &Params, operation: &mut Operation) -> Result<(
         .collect()
 }
 
-
 fn find_param<'a>(operation: &'a mut Operation, param_name: &str) -> Result<&'a ParameterData> {
     debug!("Searching for parameter {}", param_name);
     let mutable_params: &mut Vec<ReferenceOr<Parameter>> = operation.parameters.as_mut();
+    //operation.responses.responses
+    let a: StatusCode = StatusCode::Code(200);
 
     for parameter2 in mutable_params {
         let parameter: &mut ReferenceOr<Parameter> = parameter2;
         let param = parameter.to_item_mut();
-        let mut param_data = param.to_parameter_data_mut();
+        let mut param_data = param.parameter_data_mut();
         if param_data.name == param_name {
             debug!("Used! {}", param_name);
             param_data.description = Some("1".to_string());

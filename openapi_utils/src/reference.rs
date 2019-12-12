@@ -1,5 +1,27 @@
 use openapiv3::*;
 
+pub trait ParameterSchemaOrContentExt {
+    fn item(&self) -> &Schema;
+}
+
+impl ParameterSchemaOrContentExt for ParameterSchemaOrContent {
+    fn item(&self) -> &Schema {
+        match self {
+            ParameterSchemaOrContent::Schema(reference) => match reference {
+                ReferenceOr::Reference { reference: _ } => {
+                    unimplemented!("References inside schemas are not supported")
+                }
+                ReferenceOr::Item(item) => item,
+            },
+            ParameterSchemaOrContent::Content(_content) => {
+                unimplemented!("Not quite understand what's a Content in Schema")
+            }
+        }
+    }
+}
+
+
+
 pub trait ReferenceOrExt<T> {
     fn to_item(self) -> T;
     fn to_item_ref(&self) -> &T;

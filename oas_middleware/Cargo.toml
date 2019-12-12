@@ -18,7 +18,7 @@ regex = "*"
 uuid = "*"
 anyhow = "1.0"
 thiserror = "1.0"
-http = "*"
+http = "0.1"
 chrono = "0.3"
 futures = "0.1.21"
 openapi_utils = { path = "../openapi_utils" }

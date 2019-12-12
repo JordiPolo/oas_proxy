@@ -1,5 +1,6 @@
 mod dereferer;
 mod error;
+mod operation;
 mod parameter;
 mod reference;
 mod server;
@@ -11,3 +12,4 @@ pub use parameter::{ParameterDataExt, ParameterExt};
 pub use reference::ReferenceOrExt;
 pub use server::ServerExt;
 pub use types::{IntegerTypeExt, TypeExt};
+pub use operation::OperationExt;

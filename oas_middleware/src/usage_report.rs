@@ -55,7 +55,7 @@ fn usage_summary(builder: &PathFinder) -> UsedSpec {
             for parameter in &operation.parameters {
                 //  parameter_location
                 let param = parameter.to_item_ref();
-                let param_data = param.to_parameter_data();
+                let param_data = param.parameter_data();
                 let used = UsedParam {
                     used: is_used(&param_data.description),
                     name: param_data.name.clone(),

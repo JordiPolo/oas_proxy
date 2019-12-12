@@ -3,6 +3,15 @@ name = "openapi_utils"
 version = "0.1.1"
 authors = ["Jordi Polo <mumismo@gmail.com>"]
 edition = "2018"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/jordipolo/oas_proxy"
+homepage = "https://github.com/JordiPolo/oas_proxy/tree/master/openapi_utils"
+description = """
+Extension method and utilities to work with OpenAPI 3.0 files
+"""
+keywords = ["openapi"]
+autotests = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -10,4 +19,4 @@ edition = "2018"
 openapiv3 = "0.3.0"
 log = "*"
 indexmap = "1.3.0"
-http = "*"
+http = "0.1"
