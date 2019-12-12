@@ -7,16 +7,19 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/jordipolo/oas_proxy"
 homepage = "https://github.com/JordiPolo/oas_proxy/tree/master/openapi_utils"
+
 description = """
 Extension method and utilities to work with OpenAPI 3.0 files
 """
 keywords = ["openapi"]
 autotests = false
 
+exclude = [".cargo_vcs_info.json", ".gitignore"]
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 openapiv3 = "0.3.0"
-log = "*"
+log = "0.4"
 indexmap = "1.3.0"
 http = "0.1"
