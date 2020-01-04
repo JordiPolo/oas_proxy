@@ -1,5 +1,6 @@
 use openapiv3::*;
 use crate::reference::ParameterSchemaOrContentExt;
+use crate::schema::SchemaExt;
 
 /// Parameter methods
 pub trait ParameterDataExt {
@@ -9,16 +10,10 @@ pub trait ParameterDataExt {
 }
 
 impl ParameterDataExt for ParameterData {
-    /// Get the type of a parameter. Does not implement compound types.
     fn get_type(&self) -> &Type {
-        match &self.format.item().schema_kind {
-            SchemaKind::Type(schema_type) => schema_type,
-            SchemaKind::OneOf { .. } => unimplemented!("OneOf not supported"),
-            SchemaKind::AnyOf { .. } => unimplemented!("AnyOf not supported"),
-            SchemaKind::AllOf { .. } => unimplemented!("AllOf not supported"),
-            SchemaKind::Any(_) => unimplemented!("Any not supported"),
-        }
+        self.format.item().get_type()
     }
+
 }
 
 /// Parameter contains most interesting things in the parameter_data,
