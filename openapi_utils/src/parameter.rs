@@ -1,11 +1,15 @@
 use openapiv3::*;
 use crate::reference::ParameterSchemaOrContentExt;
 
+/// Parameter methods
 pub trait ParameterDataExt {
+    /// Returns the type of the schema for this parameter
+    /// Panics for oneOf, anyOf, allOf
     fn get_type(&self) -> &Type;
 }
 
 impl ParameterDataExt for ParameterData {
+    /// Get the type of a parameter. Does not implement compound types.
     fn get_type(&self) -> &Type {
         match &self.format.item().schema_kind {
             SchemaKind::Type(schema_type) => schema_type,
@@ -17,15 +21,25 @@ impl ParameterDataExt for ParameterData {
     }
 }
 
+/// Parameter contains most interesting things in the parameter_data,
+/// convenience methods to access inside that.
 pub trait ParameterExt {
+    /// Returns "query", "header", "path" or "cookie" depending on
+    /// where the parameter lives in
     fn location_string(&self) -> String;
+
+    /// borrows the internal parameter data
     fn parameter_data(&self) -> &ParameterData;
+
+    /// mutably borrows the internal parameter data
     fn parameter_data_mut(&mut self) -> &mut ParameterData;
+
+    /// Returns the name of the parameter
     fn name(&self) -> &str;
 }
 
 impl ParameterExt for Parameter {
-
+    /// Name inside the data of the parameter
     fn name(&self) -> &str {
         &self.parameter_data().name
     }

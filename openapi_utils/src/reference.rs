@@ -21,10 +21,19 @@ impl ParameterSchemaOrContentExt for ParameterSchemaOrContent {
 }
 
 
-
+/// This extension deals with ReferenceOr enums in the spec
+/// All these methods assume the spec has been previously dereferenced,
+/// see the deref_all method in the spec object.
+/// These methods are still needed because structs hold ReferenceOr enums, although
+/// these enums always have an item, never a reference.
 pub trait ReferenceOrExt<T> {
+    /// Consumes the ReferenceOr and returns the iternal Item
     fn to_item(self) -> T;
+
+    /// Returns reference to internal Item for a ReferenceOr
     fn to_item_ref(&self) -> &T;
+
+    /// Returns mutable reference to internal Item for a ReferenceOr
     fn to_item_mut(&mut self) -> &mut T;
 }
 

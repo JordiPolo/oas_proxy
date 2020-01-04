@@ -1,11 +1,15 @@
 use http::Uri;
 use openapiv3::*;
 
+/// Extends the top level Server object
 pub trait ServerExt {
+    /// Returns base_path of the server ensuring the string does not end on /
     fn base_path(&self) -> String;
 }
 
 impl ServerExt for Server {
+    /// Returns a string with the base path for the Server
+    /// It guarantees it does not end on /
     fn base_path(&self) -> String {
         if let Some(variables) = &self.variables {
             match variables.get("basePath") {
