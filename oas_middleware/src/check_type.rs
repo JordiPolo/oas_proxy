@@ -31,9 +31,13 @@ pub fn check_type(the_type: &Type, request_param_data: &Attribute) -> Result<(),
         Type::Integer(integer_type) => check_integer(request_param_data, integer_type),
         Type::Number(number_type) => check_number(request_param_data, number_type),
         Type::Boolean {} => check_boolean(request_param_data),
-        Type::Object(_object_type) => Err(E::TypeNotsupported("Object".to_string())),
+        Type::Object(object_type) => check_object(request_param_data, object_type),
         Type::Array(_array_type) => Err(E::TypeNotsupported("Array".to_string())),
     }
+}
+
+fn check_object(attribute: &Attribute, number_type: &ObjectType) -> Result<(), E> {
+    Err(E::TypeNotsupported("Object".to_string()))
 }
 
 fn read_integer(attribute: &Attribute, integer_type: &IntegerType) -> Result<i64, E> {

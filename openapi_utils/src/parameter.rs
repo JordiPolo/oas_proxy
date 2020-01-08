@@ -13,7 +13,6 @@ impl ParameterDataExt for ParameterData {
     fn get_type(&self) -> &Type {
         self.format.item().get_type()
     }
-
 }
 
 /// Parameter contains most interesting things in the parameter_data,
