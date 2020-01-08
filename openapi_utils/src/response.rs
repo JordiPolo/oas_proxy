@@ -1,7 +1,7 @@
 use crate::reference::ReferenceOrExt;
 use openapiv3::*;
 
-/// Convenience methods for common cases
+/// Extension methods for Response
 pub trait ResponseExt {
     /// Returns the Schema for this response if it responds with application/json
     fn json_schema(&self) -> Option<&Schema>;

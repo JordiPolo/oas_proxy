@@ -1,5 +1,6 @@
 use openapiv3::*;
 
+/// Extension methods for ParamScheema
 pub trait ParameterSchemaOrContentExt {
     fn item(&self) -> &Schema;
 }

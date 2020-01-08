@@ -1,7 +1,7 @@
 use http::Uri;
 use openapiv3::*;
 
-/// Extends the top level Server object
+/// Extension methods for Server
 pub trait ServerExt {
     /// Returns base_path of the server ensuring the string does not end on /
     fn base_path(&self) -> String;

@@ -2,21 +2,25 @@ use openapiv3::*;
 use crate::reference::ParameterSchemaOrContentExt;
 use crate::schema::SchemaExt;
 
-/// Parameter methods
+/// Extension methods for ParameterData
 pub trait ParameterDataExt {
-    /// Returns the type of the schema for this parameter
-    /// Panics for oneOf, anyOf, allOf
+    /// Returns the type of the schema for this parameter, see schema documentation
     fn get_type(&self) -> &Type;
+
+    /// Returns true if the schema has a type defined. See schema for documentation.
+    fn is_type_defined(&self) -> bool;
 }
 
 impl ParameterDataExt for ParameterData {
     fn get_type(&self) -> &Type {
         self.format.item().get_type()
     }
+    fn is_type_defined(&self) -> bool {
+        self.format.item().is_type_defined()
+    }
 }
 
-/// Parameter contains most interesting things in the parameter_data,
-/// convenience methods to access inside that.
+/// Extension methods for Parameter
 pub trait ParameterExt {
     /// Returns "query", "header", "path" or "cookie" depending on
     /// where the parameter lives in

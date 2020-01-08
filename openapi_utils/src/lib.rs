@@ -14,7 +14,7 @@ pub use dereferer::SpecExt;
 pub use error::DerefError;
 pub use operation::OperationExt;
 pub use parameter::{ParameterDataExt, ParameterExt};
-pub use reference::ReferenceOrExt;
+pub use reference::{ReferenceOrExt};
 pub use response::ResponseExt;
 pub use schema::SchemaExt;
 pub use server::ServerExt;

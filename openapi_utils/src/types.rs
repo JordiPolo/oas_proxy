@@ -1,7 +1,7 @@
 use openapiv3::*;
 use std::ops::Range;
 
-/// Extends the Type with convenience methods
+/// Extension methods for Type
 pub trait TypeExt {
     /// true if this type is Type::Boolean
     fn is_bool(&self) -> bool;
