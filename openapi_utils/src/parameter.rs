@@ -1,6 +1,8 @@
-use openapiv3::*;
 use crate::reference::ParameterSchemaOrContentExt;
 use crate::schema::SchemaExt;
+use alloc::string::String;
+use alloc::string::ToString;
+use openapiv3::*;
 
 /// Extension methods for ParameterData
 pub trait ParameterDataExt {

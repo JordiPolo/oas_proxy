@@ -1,9 +1,16 @@
 # Openapi Utils
 
-Extensions methods for multiple structs of the [Openapiv3 library](https://github.com/glademiller/openapiv3).
+This crate provides extensions methods for multiple structs of the [Openapiv3 crate](https://github.com/glademiller/openapiv3).
+
+It aims at making it more ergonomic to work with the information in the openapi contracts.
 
 
-This library provides a `deref_all` method on the root `openapiv3::OpenAPI` data type. This method would inline all the "$ref" in the document.
+## Usage
+
+This crate provides a `deref_all` method on the `openapiv3::OpenAPI` data type. This method would inline all the `$ref` in the document.
+
+
+### Example
 
 ```
 use openapi_utils::SpecExt;
@@ -17,9 +24,27 @@ let spec = read(filename).deref_all();
 ```
 
 
-The provided `deref` method in the ReferenceOr structure does not really do any dereference, it assumes the structures have been previously dereferenced. `deref` is still useful to make your code shorter by just choosing always the deref item instead of checking for references at every spot.
+The `to_item`, `to_item_ref` and `to_item_mut` methods in the ReferenceOr structure assumes `deref_all` has been called on the spec previously and will panic otherwise. These methods are really a shorthand to choose the right element in the enumeration (the item).
 
-For other method in other structures, please read the documentation of the method.
 
-To use these methods you need to `use` the extension structure for the corresponding structure of Openapiv3
+For other methods in other structures please refer to the documentation of each extension.
+To have these methods available in your structures you need to `use` the corresponding extension.
 
+## no_std support
+This crate is compatible with no_std, although a global allocator is required.
+
+
+#### License
+
+<sup>
+Licensed under either of <a href="LICENSE-APACHE">Apache License, Version
+2.0</a> or <a href="LICENSE-MIT">MIT license</a> at your option.
+</sup>
+
+<br>
+
+<sub>
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in this crate by you, as defined in the Apache-2.0 license, shall
+be dual licensed as above, without any additional terms or conditions.
+</sub>

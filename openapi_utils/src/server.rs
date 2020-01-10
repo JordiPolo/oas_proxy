@@ -1,3 +1,4 @@
+use alloc::string::String;
 use http::Uri;
 use openapiv3::*;
 
@@ -19,15 +20,15 @@ impl ServerExt for Server {
                     if last_character == '/' {
                         base_str.pop();
                     }
-                    base_str.clone()
+                    base_str
                 }
-                None => "".to_string(),
+                None => String::from(""),
             }
         } else {
             let url_parse = &self.url.parse::<Uri>();
             match url_parse {
-                Ok(url) => url.path().to_string(),
-                Err(_) => "".to_string(),
+                Ok(url) => String::from(url.path()),
+                Err(_) => String::from(""),
             }
         }
     }

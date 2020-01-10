@@ -1,5 +1,5 @@
+use core::ops::Range;
 use openapiv3::*;
-use std::ops::Range;
 
 /// Extension methods for Type
 pub trait TypeExt {
@@ -63,7 +63,7 @@ impl IntegerTypeExt for IntegerType {
                     minimum
                 }
             }
-            None => std::i64::MIN + 1,
+            None => core::i64::MIN + 1,
         };
 
         let the_max = match self.maximum {
@@ -74,9 +74,9 @@ impl IntegerTypeExt for IntegerType {
                     maximum
                 }
             }
-            None => std::i64::MAX - 1,
+            None => core::i64::MAX - 1,
         };
-        std::ops::Range {
+        core::ops::Range {
             start: the_min,
             end: the_max,
         }

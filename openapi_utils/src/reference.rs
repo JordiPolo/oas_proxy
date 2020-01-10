@@ -9,7 +9,7 @@ impl ParameterSchemaOrContentExt for ParameterSchemaOrContent {
     fn item(&self) -> &Schema {
         match self {
             ParameterSchemaOrContent::Schema(reference) => match reference {
-                ReferenceOr::Reference { reference: _ } => {
+                ReferenceOr::Reference { .. } => {
                     unimplemented!("References inside schemas are not supported")
                 }
                 ReferenceOr::Item(item) => item,
@@ -20,7 +20,6 @@ impl ParameterSchemaOrContentExt for ParameterSchemaOrContent {
         }
     }
 }
-
 
 /// This extension deals with ReferenceOr enums in the spec
 /// All these methods assume the spec has been previously dereferenced,

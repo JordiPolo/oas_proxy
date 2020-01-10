@@ -1,5 +1,9 @@
 use crate::error::DerefError;
 use crate::reference::ReferenceOrExt;
+use alloc::boxed::Box;
+use alloc::string::String;
+use alloc::string::ToString;
+use alloc::vec::Vec;
 use indexmap::IndexMap;
 use openapiv3::*;
 
@@ -106,9 +110,7 @@ fn set_defer_schema_contents(schema: &mut Schema, components: &Components, recur
                     recursion - 1,
                 );
             }
-            _ => {
-                return;
-            }
+            _ => {}
         },
 
         SchemaKind::OneOf { ref mut one_of } => {
@@ -193,7 +195,7 @@ where
         })?;
 
     match ref_item {
-        ReferenceOr::Reference { reference: _ } => {
+        ReferenceOr::Reference { .. } => {
             unimplemented!("References in references are not supported")
         }
         ReferenceOr::Item(item) => Ok(item.clone()),
