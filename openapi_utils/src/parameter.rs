@@ -4,7 +4,7 @@ use alloc::string::String;
 use alloc::string::ToString;
 use openapiv3::*;
 
-/// Extension methods for ParameterData
+/// Extension methods for `ParameterData`
 pub trait ParameterDataExt {
     /// Returns the type of the schema for this parameter, see schema documentation
     fn get_type(&self) -> &Type;
@@ -45,7 +45,7 @@ impl ParameterExt for Parameter {
     }
 
     /// Returns a string representing the enum of the parameter
-    /// Parameter::Query becomes "query".
+    /// `Parameter::Query` becomes "query".
     fn location_string(&self) -> String {
         match self {
             Parameter::Query { .. } => "query".to_string(),

@@ -11,8 +11,8 @@ use openapiv3::*;
 pub trait SpecExt {
     /// Dereferences all the $ref refences in the OpenAPI description.
     /// Consumes the Spec object and creates a new one with all references resolved
-    /// Note that because the inner structures are using ReferenceOr
-    /// you will still need to use the methods from the ReferenceOr extension
+    /// Note that because the inner structures are using `ReferenceOr`
+    /// you will still need to use the methods from the `ReferenceOr` extension
     /// to access the data. But these methods will always succeed as all
     /// references have been resolved ahead of time.
     ///
@@ -20,11 +20,14 @@ pub trait SpecExt {
     /// This method will panic if there are no `components` in the OpenAPI description.
     /// This method will panic AdditionalProperties
     ///
-    /// Example
+    /// # Example
+    ///
+    /// ```
     ///   let data = std::fs::read_to_string(filename).expect("OpenAPI file could not be read.");
     ///   let deser = serde_yaml::from_str(&data).expect("Could not deserialize file as OpenAPI v3.0");
     ///   let spec = spec::read(&deser).deref_all();
     ///   let paths = spec.paths;
+    /// ```
     fn deref_all(self) -> OpenAPI;
 }
 

@@ -1,5 +1,7 @@
+#![forbid(unsafe_code)]
 #![deny(missing_debug_implementations)]
 #![deny(unused_imports)]
+//#![deny(clippy::all)]
 #![no_std]
 extern crate alloc;
 
@@ -21,5 +23,4 @@ pub use reference::ReferenceOrExt;
 pub use response::ResponseExt;
 pub use schema::SchemaExt;
 pub use server::ServerExt;
-pub use types::{IntegerTypeExt, TypeExt};
-
+pub use types::{NumberTypeExt, IntegerTypeExt, TypeExt};

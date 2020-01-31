@@ -1,6 +1,6 @@
 use openapiv3::*;
 
-/// Extension methods for ParamScheema
+/// Extension methods for `ParamSchema`
 pub trait ParameterSchemaOrContentExt {
     fn item(&self) -> &Schema;
 }
@@ -21,24 +21,24 @@ impl ParameterSchemaOrContentExt for ParameterSchemaOrContent {
     }
 }
 
-/// This extension deals with ReferenceOr enums in the spec
+/// This extension deals with `ReferenceOr` enums in the spec
 /// All these methods assume the spec has been previously dereferenced,
-/// see the deref_all method in the spec object.
-/// These methods are still needed because structs hold ReferenceOr enums, although
+/// see the `deref_all` method in the spec object.
+/// These methods are still needed because structs hold `ReferenceOr` enums, although
 /// these enums always have an item, never a reference.
 pub trait ReferenceOrExt<T> {
-    /// Consumes the ReferenceOr and returns the iternal Item
+    /// Consumes the `ReferenceOr` and returns the iternal Item
     fn to_item(self) -> T;
 
-    /// Returns reference to internal Item for a ReferenceOr
+    /// Returns reference to internal Item for a `ReferenceOr`
     fn to_item_ref(&self) -> &T;
 
-    /// Returns mutable reference to internal Item for a ReferenceOr
+    /// Returns mutable reference to internal Item for a `ReferenceOr`
     fn to_item_mut(&mut self) -> &mut T;
 }
 
 impl<T> ReferenceOrExt<T> for ReferenceOr<T> {
-    /// to_item_* functions return the item of a reference without searching
+    /// `to_item_*` functions return the item of a reference without searching
     /// These functions will panic if they find a reference. They
     /// Are used as convenience methods in a document already dereferenced.
     ///
