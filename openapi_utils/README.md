@@ -12,12 +12,12 @@ This crate provides a `deref_all` method on the `openapiv3::OpenAPI` data type. 
 
 ### Example
 
-```
+```rust
 use openapi_utils::SpecExt;
 
 pub fn read<P: AsRef<Path>>(filename: P) -> openapiv3::OpenAPI {
     let data = std::fs::read_to_string(filename).expect("OpenAPI file could not be read.");
-    serde_yaml::from_str(&data).expect("Could not deserialize file as OpenAPI v3.0 yaml");
+    serde_yaml::from_str(&data).expect("Could not deserialize file as OpenAPI v3.0 yaml")
 }
 
 let spec = read(filename).deref_all();

@@ -17,7 +17,7 @@ pub trait SpecExt {
     /// references have been resolved ahead of time.
     ///
     /// # Panics
-    /// This method will panic if there are no `components` in the OpenAPI description.
+    /// This method will panic if the referenced item is not present in the OpenAPI description.
     /// This method will panic AdditionalProperties
     ///
     /// # Example
@@ -35,10 +35,8 @@ impl SpecExt for OpenAPI {
     /// Dereferences all the internal references in a document by copying
     /// the items in the place of the references.
     fn deref_all(mut self) -> OpenAPI {
-        let components = self
-            .components
-            .as_ref()
-            .expect("Dereferenciation needs `components` to be present in the file.");
+        let mut components = &Components::default();
+        self.components.as_ref().map(|comp| components = comp);
 
         for (_, path_item) in &mut self.paths {
             deref_everything_in_path(path_item, &components);
