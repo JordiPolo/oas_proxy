@@ -17,7 +17,7 @@ features = ["health"]
 env_logger = "*"
 serde = { version = "1.0", features = ["derive"] }
 structopt = { version = "0.3" }
-http = "0.1"
+http = "0.2"
 
 [profile.dev]
 debug = 0
