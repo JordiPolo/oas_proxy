@@ -17,6 +17,7 @@ impl SchemaExt for Schema {
             SchemaKind::OneOf { .. } => unimplemented!("OneOf not supported"),
             SchemaKind::AnyOf { .. } => unimplemented!("AnyOf not supported"),
             SchemaKind::AllOf { .. } => unimplemented!("AllOf not supported"),
+            SchemaKind::Not { .. } => unimplemented!("Not not supported"),
             SchemaKind::Any(_) => unimplemented!("Any not supported"),
         }
     }

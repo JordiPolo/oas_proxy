@@ -38,8 +38,8 @@ impl SpecExt for OpenAPI {
         let mut components = &Components::default();
         self.components.as_ref().map(|comp| components = comp);
 
-        for (_, path_item) in &mut self.paths {
-            deref_everything_in_path(path_item, &components);
+        for (_, mut path_item) in &mut self.paths.paths {
+            deref_everything_in_path(&mut path_item, &components);
         }
         //    println!("{:?}", spec);
         self
@@ -104,12 +104,18 @@ fn set_defer_schema_contents(schema: &mut Schema, components: &Components, recur
                 }
             }
             Type::Array(array) => {
-                set_deref_box(&mut array.items, &components.schemas);
-                set_defer_schema_contents(
-                    &mut array.items.to_item_mut(),
-                    components,
-                    recursion - 1,
-                );
+                match &mut array.items {
+                    None => {},
+                    Some(items) => {
+                        set_deref_box(items, &components.schemas);
+                        set_defer_schema_contents(
+                            items.to_item_mut(),
+                            components,
+                            recursion - 1,
+                        );
+                    }
+                }
+
             }
             _ => {}
         },
@@ -131,6 +137,11 @@ fn set_defer_schema_contents(schema: &mut Schema, components: &Components, recur
                 set_deref(&mut sch, &components.schemas);
                 set_defer_schema_contents(&mut sch.to_item_mut(), components, recursion - 1);
             }
+        }
+        SchemaKind::Not { ref mut not } => {
+            let mut sch = not;
+            set_deref(&mut sch, &components.schemas);
+            set_defer_schema_contents(&mut sch.to_item_mut(), components, recursion - 1);
         }
         SchemaKind::Any(schema) => {
             for (_name, mut property) in &mut schema.properties {
