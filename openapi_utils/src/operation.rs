@@ -1,5 +1,3 @@
-use crate::parameter::ParameterExt;
-use crate::reference::ReferenceOrExt;
 use alloc::vec::Vec;
 use openapiv3::*;
 
@@ -23,22 +21,24 @@ impl OperationExt for Operation {
         self.responses
             .responses
             .get(&status_code)
-            .map(|ref_or_item| ref_or_item.to_item_ref())
+            .map(|ref_or_item| ref_or_item.as_item()).flatten()
     }
 
     fn required_parameters(&self) -> Vec<&Parameter> {
         self.parameters
             .iter()
-            .map(|p| p.to_item_ref())
-            .filter(|p| p.parameter_data().required)
+            .map(|p| p.as_item())
+            .flatten()
+            .filter(|p| p.parameter_data_ref().required)
             .collect()
     }
 
     fn optional_parameters(&self) -> Vec<&Parameter> {
         self.parameters
             .iter()
-            .map(|p| p.to_item_ref())
-            .filter(|p| !p.parameter_data().required)
+            .map(|p| p.as_item())
+            .flatten()
+            .filter(|p| !p.parameter_data_ref().required)
             .collect()
     }
 }

@@ -28,9 +28,6 @@ pub trait ParameterExt {
     /// where the parameter lives in
     fn location_string(&self) -> String;
 
-    /// borrows the internal parameter data
-    fn parameter_data(&self) -> &ParameterData;
-
     /// mutably borrows the internal parameter data
     fn parameter_data_mut(&mut self) -> &mut ParameterData;
 
@@ -41,7 +38,7 @@ pub trait ParameterExt {
 impl ParameterExt for Parameter {
     /// Name inside the data of the parameter
     fn name(&self) -> &str {
-        &self.parameter_data().name
+        &self.parameter_data_ref().name
     }
 
     /// Returns a string representing the enum of the parameter
@@ -52,17 +49,6 @@ impl ParameterExt for Parameter {
             Parameter::Header { .. } => "header".to_string(),
             Parameter::Path { .. } => "path".to_string(),
             Parameter::Cookie { .. } => "cookie".to_string(),
-        }
-    }
-
-    /// Convenience method to access the internal parameter data
-    /// independent from the kind of parameter we are using.
-    fn parameter_data(&self) -> &ParameterData {
-        match self {
-            Parameter::Query { parameter_data, .. } => parameter_data,
-            Parameter::Header { parameter_data, .. } => parameter_data,
-            Parameter::Path { parameter_data, .. } => parameter_data,
-            Parameter::Cookie { parameter_data, .. } => parameter_data,
         }
     }
 

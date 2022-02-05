@@ -1,4 +1,3 @@
-use crate::reference::ReferenceOrExt;
 use openapiv3::*;
 
 /// Extension methods for Response
@@ -12,6 +11,7 @@ impl ResponseExt for Response {
     fn json_schema(&self) -> Option<&Schema> {
         self.content
             .get("application/json")
-            .and_then(|media| media.schema.as_ref().map(|schema| schema.to_item_ref()))
+            .and_then(|media| media.schema.as_ref().map(|schema| schema.as_item())
+            .flatten())
     }
 }
