@@ -1,3 +1,5 @@
+# 0.5.0
+- Use Indexmap 2.0
 
 # 0.4.0
 - Removed `parameter_data` use `parameter.parameter_data()` and `parameter.parameter_data_ref()`
