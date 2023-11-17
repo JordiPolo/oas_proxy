@@ -388,6 +388,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "http"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b32afd38673a8016f7c9ae69e5af41a58f81b1d31689040f2f1959594ce194ea"
+dependencies = [
+ "bytes 1.5.0",
+ "fnv",
+ "itoa 1.0.9",
+]
+
+[[package]]
 name = "http-body"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -732,9 +743,9 @@ checksum = "dd8b5dd2ae5ed71462c540258bedcb51965123ad7e7ccf4b9a8cafaa4a63576d"
 
 [[package]]
 name = "openapi_utils"
-version = "0.5.0"
+version = "0.5.2"
 dependencies = [
- "http 0.2.11",
+ "http 1.0.0",
  "indexmap 2.1.0",
  "log",
  "openapiv3 1.0.3",
