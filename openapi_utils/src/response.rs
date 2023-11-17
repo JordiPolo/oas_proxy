@@ -11,7 +11,6 @@ impl ResponseExt for Response {
     fn json_schema(&self) -> Option<&Schema> {
         self.content
             .get("application/json")
-            .and_then(|media| media.schema.as_ref().map(|schema| schema.as_item())
-            .flatten())
+            .and_then(|media| media.schema.as_ref().and_then(|schema| schema.as_item()))
     }
 }

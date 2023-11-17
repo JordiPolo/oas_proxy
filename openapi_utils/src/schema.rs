@@ -23,9 +23,6 @@ impl SchemaExt for Schema {
     }
 
     fn is_type_defined(&self) -> bool {
-        match &self.schema_kind {
-            SchemaKind::Type(_) => true,
-            _ => false,
-        }
+        matches!(&self.schema_kind, SchemaKind::Type(_))
     }
 }

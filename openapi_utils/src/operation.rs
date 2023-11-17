@@ -21,14 +21,13 @@ impl OperationExt for Operation {
         self.responses
             .responses
             .get(&status_code)
-            .map(|ref_or_item| ref_or_item.as_item()).flatten()
+            .and_then(|ref_or_item| ref_or_item.as_item())
     }
 
     fn required_parameters(&self) -> Vec<&Parameter> {
         self.parameters
             .iter()
-            .map(|p| p.as_item())
-            .flatten()
+            .filter_map(|p| p.as_item())
             .filter(|p| p.parameter_data_ref().required)
             .collect()
     }
@@ -36,8 +35,7 @@ impl OperationExt for Operation {
     fn optional_parameters(&self) -> Vec<&Parameter> {
         self.parameters
             .iter()
-            .map(|p| p.as_item())
-            .flatten()
+            .filter_map(|p| p.as_item())
             .filter(|p| !p.parameter_data_ref().required)
             .collect()
     }

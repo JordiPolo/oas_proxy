@@ -17,31 +17,19 @@ pub trait TypeExt {
 
 impl TypeExt for Type {
     fn is_bool(&self) -> bool {
-        match self {
-            Type::Boolean {} => true,
-            _ => false,
-        }
+        matches!(self, Type::Boolean {})
     }
 
     fn is_integer(&self) -> bool {
-        match self {
-            Type::Integer(_) => true,
-            _ => false,
-        }
+        matches!(self, Type::Integer(_))
     }
 
     fn is_number(&self) -> bool {
-        match self {
-            Type::Number(_) => true,
-            _ => false,
-        }
+        matches!(self, Type::Number(_))
     }
 
     fn is_string(&self) -> bool {
-        match self {
-            Type::String(_) => true,
-            _ => false,
-        }
+        matches!(self, Type::String(_))
     }
 }
 

@@ -38,8 +38,8 @@ impl SpecExt for OpenAPI {
         let mut components = &Components::default();
         self.components.as_ref().map(|comp| components = comp);
 
-        for (_, mut path_item) in &mut self.paths.paths {
-            deref_everything_in_path(&mut path_item, &components);
+        for (_, path_item) in &mut self.paths.paths {
+            deref_everything_in_path(path_item, components);
         }
         //    println!("{:?}", spec);
         self
@@ -48,13 +48,13 @@ impl SpecExt for OpenAPI {
 
 fn deref_everything_in_path(path_item: &mut ReferenceOr<PathItem>, components: &Components) {
     let p_item = path_item.to_item_mut(); //TODO: no Deref possible? Where in components?
-    set_deref_all_params(&mut p_item.parameters, &components);
+    set_deref_all_params(&mut p_item.parameters, components);
 
     let p_item2 = p_item.clone(); // hack as things are used, etc.
 
     for operation in operation_list(p_item) {
         // inline params
-        set_deref_all_params(&mut operation.parameters, &components);
+        set_deref_all_params(&mut operation.parameters, components);
         // Move from path level params to each operation so it is easier later
         for param in &p_item2.parameters {
             operation.parameters.push(param.clone());
@@ -62,12 +62,12 @@ fn deref_everything_in_path(path_item: &mut ReferenceOr<PathItem>, components: &
 
         // inline request body
         if operation.request_body.is_some() {
-            let mut req_body = operation.request_body.as_mut().unwrap();
-            set_deref(&mut req_body, &components.request_bodies);
+            let req_body = operation.request_body.as_mut().unwrap();
+            set_deref(req_body, &components.request_bodies);
             let body: &mut RequestBody = req_body.to_item_mut();
             for (_, media) in &mut body.content {
-                let mut schema = media.schema.as_mut().unwrap();
-                set_deref(&mut schema, &components.schemas);
+                let schema = media.schema.as_mut().unwrap();
+                set_deref(schema, &components.schemas);
                 set_defer_schema_contents(schema.to_item_mut(), components, 10);
             }
         }
@@ -79,8 +79,8 @@ fn deref_everything_in_path(path_item: &mut ReferenceOr<PathItem>, components: &
                 set_deref(header, &components.headers);
             }
             for (_, media) in &mut response.to_item_mut().content {
-                let mut schema = media.schema.as_mut().unwrap();
-                set_deref(&mut schema, &components.schemas);
+                let schema = media.schema.as_mut().unwrap();
+                set_deref(schema, &components.schemas);
                 set_defer_schema_contents(schema.to_item_mut(), components, 10);
             }
         }
@@ -94,10 +94,10 @@ fn set_defer_schema_contents(schema: &mut Schema, components: &Components, recur
     match &mut schema.schema_kind {
         SchemaKind::Type(schema_type) => match schema_type {
             Type::Object(object) => {
-                for (_name, mut property) in &mut object.properties {
-                    set_deref_box(&mut property, &components.schemas);
+                for (_name, property) in &mut object.properties {
+                    set_deref_box(property, &components.schemas);
                     set_defer_schema_contents(
-                        &mut property.to_item_mut(),
+                        property.to_item_mut(),
                         components,
                         recursion - 1,
                     );
@@ -121,37 +121,37 @@ fn set_defer_schema_contents(schema: &mut Schema, components: &Components, recur
         },
 
         SchemaKind::OneOf { ref mut one_of } => {
-            for mut sch in &mut one_of.iter_mut() {
-                set_deref(&mut sch, &components.schemas);
-                set_defer_schema_contents(&mut sch.to_item_mut(), components, recursion - 1);
+            for sch in &mut one_of.iter_mut() {
+                set_deref(sch, &components.schemas);
+                set_defer_schema_contents(sch.to_item_mut(), components, recursion - 1);
             }
         }
         SchemaKind::AnyOf { ref mut any_of } => {
-            for mut sch in &mut any_of.iter_mut() {
-                set_deref(&mut sch, &components.schemas);
-                set_defer_schema_contents(&mut sch.to_item_mut(), components, recursion - 1);
+            for sch in &mut any_of.iter_mut() {
+                set_deref(sch, &components.schemas);
+                set_defer_schema_contents(sch.to_item_mut(), components, recursion - 1);
             }
         }
         SchemaKind::AllOf { ref mut all_of } => {
-            for mut sch in &mut all_of.iter_mut() {
-                set_deref(&mut sch, &components.schemas);
-                set_defer_schema_contents(&mut sch.to_item_mut(), components, recursion - 1);
+            for sch in &mut all_of.iter_mut() {
+                set_deref(sch, &components.schemas);
+                set_defer_schema_contents(sch.to_item_mut(), components, recursion - 1);
             }
         }
         SchemaKind::Not { ref mut not } => {
-            let mut sch = not;
-            set_deref(&mut sch, &components.schemas);
-            set_defer_schema_contents(&mut sch.to_item_mut(), components, recursion - 1);
+            let sch = not;
+            set_deref(sch, &components.schemas);
+            set_defer_schema_contents(sch.to_item_mut(), components, recursion - 1);
         }
         SchemaKind::Any(schema) => {
-            for (_name, mut property) in &mut schema.properties {
-                set_deref_box(&mut property, &components.schemas);
-                set_defer_schema_contents(&mut property.to_item_mut(), components, recursion - 1);
+            for (_name, property) in &mut schema.properties {
+                set_deref_box(property, &components.schemas);
+                set_defer_schema_contents(property.to_item_mut(), components, recursion - 1);
             }
             if schema.items.is_some() {
-                let mut the_items = schema.items.as_mut().unwrap();
-                set_deref_box(&mut the_items, &components.schemas);
-                set_defer_schema_contents(&mut the_items.to_item_mut(), components, recursion - 1);
+                let the_items = schema.items.as_mut().unwrap();
+                set_deref_box(the_items, &components.schemas);
+                set_defer_schema_contents(the_items.to_item_mut(), components, recursion - 1);
             }
         }
     }
@@ -163,7 +163,7 @@ fn set_deref_all_params(parameters: &mut Vec<ReferenceOr<Parameter>>, components
     }
 }
 
-fn set_deref<'a, T>(item: &'a mut ReferenceOr<T>, component_type: &IndexMap<String, ReferenceOr<T>>)
+fn set_deref<T>(item: &mut ReferenceOr<T>, component_type: &IndexMap<String, ReferenceOr<T>>)
 where
     T: Clone,
 {
