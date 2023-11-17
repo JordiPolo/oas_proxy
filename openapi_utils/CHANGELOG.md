@@ -1,3 +1,7 @@
+# 0.5.1
+- Use Indexmap 2.1
+- Use http 1.0
+
 # 0.5.0
 - Use Indexmap 2.0
 

@@ -22,5 +22,5 @@ exclude = [".cargo_vcs_info.json", ".gitignore"]
 [dependencies]
 openapiv3 = "1.0"
 log = "0.4"
-indexmap = "2.0.0"
-http = "0.2"
+indexmap = "2.1"
+http = "1.0"
