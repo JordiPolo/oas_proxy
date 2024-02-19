@@ -17,7 +17,7 @@ pub trait TypeExt {
 
 impl TypeExt for Type {
     fn is_bool(&self) -> bool {
-        matches!(self, Type::Boolean {})
+        matches!(self, Type::Boolean(_))
     }
 
     fn is_integer(&self) -> bool {

@@ -1,3 +1,7 @@
+# 0.6.0
+- Use openapiv3 2.0
+- Support oneOf, anyOf, allOf
+
 # 0.5.2
 - Resolve references in references
 

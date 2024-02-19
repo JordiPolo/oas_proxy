@@ -1,6 +1,6 @@
 [package]
 name = "openapi_utils"
-version = "0.5.2"
+version = "0.6.0"
 authors = ["Jordi Polo <mumismo@gmail.com>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
@@ -20,7 +20,7 @@ exclude = [".cargo_vcs_info.json", ".gitignore"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-openapiv3 = "1.0"
+openapiv3 = "2.0"
 log = "0.4"
 indexmap = "2.1"
 http = "1.0"
