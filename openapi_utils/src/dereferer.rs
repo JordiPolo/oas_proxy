@@ -158,6 +158,18 @@ fn set_defer_schema_contents(
                 set_deref_box(the_items, &components.schemas, referred);
                 set_defer_schema_contents(the_items.to_item_mut(), components, recursion - 1, referred);
             }
+            for sch in &mut schema.one_of.iter_mut() {
+                set_deref(sch, &components.schemas, referred);
+                set_defer_schema_contents(sch.to_item_mut(), components, recursion - 1, referred);
+            }
+            for sch in &mut schema.any_of.iter_mut() {
+                set_deref(sch, &components.schemas, referred);
+                set_defer_schema_contents(sch.to_item_mut(), components, recursion - 1, referred);
+            }
+            for sch in &mut schema.all_of.iter_mut() {
+                set_deref(sch, &components.schemas, referred);
+                set_defer_schema_contents(sch.to_item_mut(), components, recursion - 1, referred);
+            }
         }
     }
 }
