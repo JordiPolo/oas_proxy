@@ -1,3 +1,6 @@
+# 0.6.1
+- Fix to not call `unwrap` on `media.schema` if it is None
+
 # 0.6.0
 - Use openapiv3 2.0
 - Support oneOf, anyOf, allOf
