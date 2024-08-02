@@ -1,6 +1,6 @@
 [package]
 name = "openapi_utils"
-version = "0.6.0"
+version = "0.6.1"
 authors = ["Jordi Polo <mumismo@gmail.com>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"

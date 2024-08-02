@@ -65,6 +65,9 @@ fn deref_everything_in_path(path_item: &mut ReferenceOr<PathItem>, components: &
             set_deref(req_body, &components.request_bodies, &mut Vec::new());
             let body: &mut RequestBody = req_body.to_item_mut();
             for (_, media) in &mut body.content {
+                if media.schema.is_none() {
+                    continue;
+                }
                 let schema = media.schema.as_mut().unwrap();
                 let mut referred = Vec::new();
                 set_deref(schema, &components.schemas, &mut referred);
@@ -79,6 +82,9 @@ fn deref_everything_in_path(path_item: &mut ReferenceOr<PathItem>, components: &
                 set_deref(header, &components.headers, &mut Vec::new());
             }
             for (_, media) in &mut response.to_item_mut().content {
+                if media.schema.is_none() {
+                    continue;
+                }
                 let schema = media.schema.as_mut().unwrap();
                 let mut referred = Vec::new();
                 set_deref(schema, &components.schemas, &mut referred);
